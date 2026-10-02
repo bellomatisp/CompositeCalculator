@@ -176,23 +176,33 @@ input[type=range]{flex:1;accent-color:var(--ink);background:transparent}
 .layer:hover{background:var(--soft)}
 .layer.sel{border-color:var(--ink);background:#fff}
 .layer.off{opacity:.42}
-.lrow{display:flex;align-items:center;gap:8px}
+.lrow{display:flex;align-items:center;gap:6px}
 .eye{border:none;background:none;color:var(--ink-3);cursor:pointer;padding:2px;display:grid;place-items:center;flex:none}
 .eye svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.5}
 .eye:hover{color:var(--ink)}
 .thumb{width:32px;height:32px;border-radius:9px;background:#fff;border:1px solid var(--line);flex:none}
 .num{font-family:var(--mono);font-size:11px;color:var(--ink-3);width:16px;text-align:right;flex:none}
-.lrow input{width:52px;padding:5px;font-size:12.5px;text-align:right;background:transparent;border-color:transparent}
+.lrow input{width:46px;padding:5px 4px;font-size:12.5px;text-align:right;background:transparent;border-color:transparent}
+.lrow input.thk{width:62px}
+.lrow input::-webkit-outer-spin-button,.lrow input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.lrow input[type=number]{-moz-appearance:textfield;appearance:textfield}
 .lrow input:hover{border-color:var(--line)}
 .lrow input:focus{background:#fff;border-color:var(--ink)}
 .lrow u{font-style:normal;text-decoration:none;color:var(--ink-3);font-size:10.5px;font-family:var(--mono);margin-left:-4px}
-.lrow select.type{width:76px;padding:5px 4px;font-size:12px;background:transparent;border-color:transparent}
+.lrow select.type{width:70px;padding:5px 4px;font-size:12px;background:transparent;border-color:transparent}
 .lrow select.type:hover{border-color:var(--line)}
 .del{border:none;background:none;color:var(--ink-3);cursor:pointer;padding:2px 3px;margin-left:auto;flex:none}
 .del:hover{color:var(--bad)}
 .lfib{margin-top:7px;padding-left:40px}
 .lfib{display:flex;align-items:center;gap:8px}
 .lfib select{flex:1;padding:6px 9px;font-size:12px;border-radius:9px;background:#fff}
+.manbox{margin:8px 0 2px;padding-left:38px}
+.manbox summary{font-family:var(--mono);font-size:11px;color:var(--ink-3);cursor:pointer;list-style:none}
+.manbox summary:hover{color:var(--ink)}
+.mangrid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px 9px;margin-top:8px}
+.mangrid label{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-3)}
+.mangrid input{width:100%;padding:4px 6px;font-size:11.5px;text-align:right;background:#fff;border-radius:6px}
+.mangrid span{flex:none;width:34px;font-family:var(--mono)}
 .lfib .derived{font-family:var(--mono);font-size:11px;color:var(--ink-3);white-space:nowrap}
 .edge{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin:5px 0}
 
@@ -214,6 +224,76 @@ table.res td.u{color:var(--ink-3);font-size:11px;width:1%;white-space:nowrap;pad
 details.more{margin-top:14px;border-top:1px solid var(--line);padding-top:11px}
 details.more summary{cursor:pointer;font-size:12px;color:var(--ink-3);font-family:var(--mono)}
 details.more summary:hover{color:var(--ink)}
+
+/* ---------- explanations on hover ---------- */
+[data-tip],[data-tipkey]{cursor:help}
+.lrow select[data-tipkey],.lfib select[data-tipkey],input[type=range][data-tipkey],
+.seg button[data-tipkey],.tab[data-tipkey],.chipbtn[data-tipkey]{cursor:pointer}
+input[type=number][data-tip],input[type=number][data-tipkey]{cursor:text}
+td.d[data-tip]{text-decoration:underline dotted #C9CDD0;text-underline-offset:3px}
+#hint{
+  position:fixed;z-index:60;max-width:260px;pointer-events:none;
+  background:var(--ink);color:#F2F3F5;border-radius:10px;padding:9px 11px;
+  font-size:12px;line-height:1.45;box-shadow:0 10px 30px rgba(0,0,0,.18);
+  opacity:0;transform:translateY(3px);transition:opacity .14s,transform .14s;
+}
+#hint.on{opacity:1;transform:none}
+#hint b{display:block;font-family:var(--mono);font-weight:500;font-size:11px;color:#A3A8AC;margin-bottom:3px}
+
+/* ---------- curves ---------- */
+.curvesel{margin-bottom:10px}
+.curvesel .chipbtn[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chart{position:relative;margin:2px 0 4px;touch-action:none}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.chart .ax{font-family:var(--mono);font-size:9.5px;fill:var(--ink-3)}
+.chart .grid{stroke:#EDEDED;stroke-width:1}
+.chart .zero{stroke:#D5D5D5;stroke-width:1}
+.chart .hl{stroke:var(--ink);stroke-width:1;stroke-dasharray:2 3}
+.chart .tip{
+  position:absolute;top:6px;pointer-events:none;background:var(--ink);color:#fff;font-family:var(--mono);
+  font-size:11px;padding:6px 9px;border-radius:9px;white-space:nowrap;display:none;line-height:1.55;z-index:2;
+}
+.chart .tip i{font-style:normal;color:#9BA0A4}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin:2px 0 4px}
+.legend svg{width:20px;height:6px;vertical-align:middle;margin-right:4px}
+
+/* ---------- models window ---------- */
+.tabs .modelsbtn{margin-left:auto;border:1px solid var(--line);background:#fff;color:var(--ink)}
+.tabs .modelsbtn[aria-expanded=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.modelswin{left:auto;right:22px;width:580px;z-index:25}
+.mintro{font-size:12px;color:var(--ink-2);margin:0 0 4px}
+.mblock{padding:16px 0 14px;border-top:1px solid var(--line)}
+.mblock:first-of-type{border-top:none}
+.mtitle{font-family:var(--mono);font-size:12px;color:var(--ink);margin-bottom:10px}
+.mtitle span{color:var(--ink-3)}
+.mrow{display:grid;grid-template-columns:158px 1fr;gap:16px;align-items:start}
+.mopts{display:flex;flex-direction:column;gap:5px}
+.mopt{
+  text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 10px;
+  cursor:pointer;font-size:12px;color:var(--ink-2);line-height:1.3;font-family:var(--sans);
+}
+.mopt:hover{border-color:var(--ink-3);color:var(--ink)}
+.mopt .tier{display:block;font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-bottom:1px}
+.mopt .rec{float:right;font-family:var(--mono);font-size:9.5px;color:var(--ok);margin-left:6px}
+.mopt[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.mopt[aria-pressed=true] .tier{color:#A3A8AC}
+.mopt[aria-pressed=true] .rec{color:#9FE0BE}
+.mopt:disabled{cursor:default;opacity:1}
+.fx{
+  font-family:"Cambria Math","STIX Two Math","Latin Modern Math","Times New Roman",serif;font-style:italic;
+  font-size:15px;color:var(--ink);line-height:1.9;overflow-x:auto;padding:2px 0 4px;
+}
+.fx div{white-space:nowrap}
+.fx .fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.25;margin:0 2px}
+.fx .fr>span:first-child{border-bottom:1px solid currentColor;padding:0 4px 2px}
+.fx .fr>span:last-child{padding:2px 4px 0}
+.fx sub,.fx sup{font-size:.68em}
+.mnote{font-size:12px;color:var(--ink-2);margin:6px 0 7px;line-height:1.5}
+.mlive{font-family:var(--mono);font-size:11.5px;color:var(--ink);background:var(--paper);border:1px solid var(--line);
+  border-radius:8px;padding:5px 9px;display:inline-block;margin:0 0 7px}
+.msrc a{display:block;font-size:11.5px;color:var(--ink-2);text-decoration:none;margin-top:3px}
+.msrc a:hover{color:var(--ink);text-decoration:underline}
+@media (max-width:900px){ .modelswin{left:86px;right:auto;width:calc(100vw - 108px)} .mrow{grid-template-columns:1fr} }
 
 /* ---------- export ---------- */
 .seg{display:inline-flex;background:var(--soft);border-radius:99px;padding:3px;gap:2px;flex-wrap:wrap}
@@ -238,6 +318,7 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
 <body>
 
 <canvas id="gl"></canvas>
+<div id="hint" role="tooltip"></div>
 
 <button class="mark" id="mark" aria-expanded="false" title="Matis Bello"><img src="data:image/jpeg;base64,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" alt="Matis Bello"></button>
 <span class="credit">made by Matis BELLO</span>
@@ -257,7 +338,7 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
 <div class="ruler">
   <div class="track">
     <div class="ticks"></div>
-    <input type="range" id="explode" min="0" max="1" step="0.01" value="0">
+    <input type="range" id="explode" min="0" max="1" step="0.01" value="0" data-tipkey="explode" data-tip-title="explode">
     <span class="cap">explode</span>
   </div>
 </div>
@@ -303,40 +384,34 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
 <section class="panel" id="p-matrix" hidden>
   <div class="p-head"><h2>matrix &amp; reinforcement content</h2><button class="close" data-close>✕</button></div>
   <div class="p-body">
-    <label class="f"><span>matrix</span><select id="res"></select></label>
-    <label class="f"><span>reinforcement content</span>
+    <label class="f"><span data-tipkey="matrix" data-tip-title="matrix">matrix</span><select id="res"></select></label>
+    <label class="f"><span data-tipkey="reinforcement" data-tip-title="reinforcement content">reinforcement content</span>
       <div class="seg" id="segMode" style="margin-bottom:9px">
-        <button data-v="vf" aria-pressed="true">volume V<sub>f</sub></button>
-        <button data-v="mf" aria-pressed="false">mass M<sub>f</sub></button>
+        <button data-v="vf" aria-pressed="true" data-tipkey="Vf" data-tip-title="Vf">volume V<sub>f</sub></button>
+        <button data-v="mf" aria-pressed="false" data-tipkey="Mf" data-tip-title="Mf">mass M<sub>f</sub></button>
       </div>
       <div class="slider-row"><input type="range" id="frac" min="0.15" max="0.80" step="0.005" value="0.55"><span class="val" id="fracv">55%</span></div>
       <div class="reco-bar"><span class="reco-band" id="recBand"></span><span class="reco-tick" id="recTick"></span></div>
       <p class="reco-note" id="recNote"></p>
-      <div class="btnrow"><button class="chipbtn" id="useRec">use recommended</button></div>
+      <div class="btnrow"><button class="chipbtn" id="useRec" data-tipkey="userec" data-tip-title="recommended content">use recommended</button></div>
     </label>
-    <label class="f"><span>void content V<sub>v</sub> (%)</span><input type="number" id="vv" min="0" max="10" step="0.5" value="0"></label>
+    <label class="f"><span data-tipkey="voids" data-tip-title="void content">void content V<sub>v</sub> (%)</span><input type="number" id="vv" min="0" max="10" step="0.5" value="0"></label>
     <p class="mini" id="convOut">—</p>
     <div class="sect">fabric balance</div>
-    <label class="f"><span>warp ratio k — 0.5 balanced, 1 = UD tape</span>
+    <label class="f"><span data-tipkey="warp" data-tip-title="warp ratio k">warp ratio k — 0.5 balanced, 1 = UD tape</span>
       <div class="slider-row"><input type="range" id="kw" min="0.3" max="0.9" step="0.01" value="0.5"><span class="val" id="kwv">0.50</span></div>
     </label>
-    <div class="sect">custom ply constants</div>
-    <p class="mini">Set a layer's reinforcement to “Custom constants” to use these values instead of the mixture law.</p>
+    <div class="sect">matrix properties</div>
+    <p class="mini">Editing any value switches the matrix to <i>Custom resin</i>, leaving the catalogue entries untouched.</p>
     <div class="row2">
-      <label class="f"><span>E₁ (GPa)</span><input type="number" id="mE1" step="0.1" value="119"></label>
-      <label class="f"><span>E₂ = E₃ (GPa)</span><input type="number" id="mE2" step="0.1" value="7.2"></label>
-      <label class="f"><span>G₁₂ = G₁₃ (GPa)</span><input type="number" id="mG12" step="0.1" value="4.2"></label>
-      <label class="f"><span>G₂₃ (GPa)</span><input type="number" id="mG23" step="0.1" value="3"></label>
-      <label class="f"><span>ν₁₂ = ν₁₃</span><input type="number" id="mN12" step="0.01" value="0.25"></label>
-      <label class="f"><span>ν₂₃</span><input type="number" id="mN23" step="0.01" value="0.4"></label>
-      <label class="f"><span>ρ (kg/m³)</span><input type="number" id="mRho" step="10" value="1550"></label>
-      <label class="f"><span>α₁ (10⁻⁶/K)</span><input type="number" id="mA1" step="0.1" value="0"></label>
-      <label class="f"><span>X+ (MPa)</span><input type="number" id="mXt" step="10" value="2130"></label>
-      <label class="f"><span>X− (MPa)</span><input type="number" id="mXc" step="10" value="1165"></label>
-      <label class="f"><span>Y+ (MPa)</span><input type="number" id="mYt" step="1" value="36"></label>
-      <label class="f"><span>Y− (MPa)</span><input type="number" id="mYc" step="1" value="140"></label>
-      <label class="f"><span>S (MPa)</span><input type="number" id="mS" step="1" value="65"></label>
+      <label class="f"><span data-tipkey="Em" data-tip-title="Em">E<sub>m</sub> (MPa)</span><input type="number" id="rE" step="10"></label>
+      <label class="f"><span data-tipkey="num" data-tip-title="νm">ν<sub>m</sub></span><input type="number" id="rNu" step="0.01"></label>
+      <label class="f"><span data-tipkey="rhom" data-tip-title="ρm">ρ<sub>m</sub> (kg/m³)</span><input type="number" id="rRho" step="10"></label>
+      <label class="f"><span data-tipkey="am" data-tip-title="αm">α<sub>m</sub> (10⁻⁶/K)</span><input type="number" id="rA" step="1"></label>
+      <label class="f"><span data-tipkey="stm" data-tip-title="σm tension">σ<sub>m</sub> tension (MPa)</span><input type="number" id="rSt" step="1"></label>
+      <label class="f"><span data-tipkey="scm" data-tip-title="σm compression">σ<sub>m</sub> compression (MPa)</span><input type="number" id="rSc" step="1"></label>
     </div>
+    <p class="reco-note" id="rDeriv"></p>
   </div>
 </section>
 
@@ -345,18 +420,18 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
   <div class="p-body">
     <button class="btn primary block" id="addPly" style="margin-bottom:14px">＋ add layer</button>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-      <span class="lb" style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">thickness by</span>
+      <span class="lb" style="font-family:var(--mono);font-size:11px;color:var(--ink-3)" data-tipkey="thickby" data-tip-title="thickness by">thickness by</span>
       <div class="seg" id="segThick">
         <button data-v="mm" aria-pressed="true">mm</button>
         <button data-v="gsm" aria-pressed="false">g/m²</button>
       </div>
-      <span style="margin-left:auto"><button class="btn" id="mirror">mirror</button></span>
+      <span style="margin-left:auto"><button class="btn" id="mirror" data-tipkey="mirror" data-tip-title="mirror">mirror</button></span>
     </div>
     <p class="reco-note" id="hOut"></p>
     <div class="edge">top · z = +h/2</div>
     <div id="layers"></div>
     <div class="edge">bottom · z = −h/2</div>
-    <div class="sect">presets</div>
+    <div class="sect" data-tipkey="preset" data-tip-title="presets">presets</div>
     <div class="btnrow">
       <button class="chipbtn preset" data-p="0,0,0,0">[0]₄</button>
       <button class="chipbtn preset" data-p="0,90,90,0">[0/90]ₛ</button>
@@ -371,29 +446,37 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
   <div class="p-head"><a class="help" href="https://docs.google.com/document/d/1A-b0zgTpBfbzJLn_oqJ9uBV1P4TOEZHLGL0iOeH4EMs/edit?usp=sharing" target="_blank" rel="noopener noreferrer" title="How these values are calculated">?</a><h2>properties</h2><button class="close" data-close>✕</button></div>
   <div class="p-body">
     <div class="tabs" role="tablist">
-      <button class="tab" role="tab" aria-selected="true" data-t="ply">ply</button>
-      <button class="tab" role="tab" aria-selected="false" data-t="shell">shell</button>
-      <button class="tab" role="tab" aria-selected="false" data-t="solid">solid</button>
-      <button class="tab" role="tab" aria-selected="false" data-t="strength">strength</button>
+      <button class="tab" role="tab" aria-selected="true" data-t="ply" data-tipkey="tab-ply">ply</button>
+      <button class="tab" role="tab" aria-selected="false" data-t="shell" data-tipkey="tab-shell">shell</button>
+      <button class="tab" role="tab" aria-selected="false" data-t="solid" data-tipkey="tab-solid">solid</button>
+      <button class="tab" role="tab" aria-selected="false" data-t="strength" data-tipkey="tab-strength">strength</button>
+      <button class="tab" role="tab" aria-selected="false" data-t="curves" data-tipkey="tab-curves">curves</button>
+      <button class="tab modelsbtn" id="openModels" aria-expanded="false" data-tipkey="models" data-tip-title="models">models</button>
     </div>
     <div id="t-ply"></div>
     <div id="t-shell" hidden></div>
     <div id="t-solid" hidden></div>
     <div id="t-strength" hidden></div>
+    <div id="t-curves" hidden></div>
   </div>
+</section>
+
+<section class="panel modelswin" id="p-models" hidden>
+  <div class="p-head"><h2>models &amp; formulas</h2><button class="close" id="closeModels">✕</button></div>
+  <div class="p-body" id="modelsBody"></div>
 </section>
 
 <section class="panel wide" id="p-export" hidden>
   <div class="p-head"><h2>solver export</h2><button class="close" data-close>✕</button></div>
   <div class="p-body">
     <div class="expgrid">
-      <div><span class="lb">element type</span>
+      <div><span class="lb" data-tipkey="kind" data-tip-title="element type">element type</span>
         <div class="seg" id="segKind"><button data-v="shell" aria-pressed="true">shell</button><button data-v="solid" aria-pressed="false">solid</button></div>
       </div>
-      <div><span class="lb">format</span>
+      <div><span class="lb" data-tipkey="fmt" data-tip-title="format">format</span>
         <div class="seg" id="segFmt"><button data-v="txt" aria-pressed="true">data sheet</button><button data-v="ansys" aria-pressed="false">ansys apdl</button><button data-v="abaqus" aria-pressed="false">abaqus</button><button data-v="csv" aria-pressed="false">csv</button></div>
       </div>
-      <div><span class="lb">unit system</span>
+      <div><span class="lb" data-tipkey="units" data-tip-title="unit system">unit system</span>
         <div class="seg" id="segUnit"><button data-v="mm" aria-pressed="true">mm · N · t</button><button data-v="si" aria-pressed="false">m · N · kg</button></div>
       </div>
     </div>
@@ -413,21 +496,21 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
    E, G in GPa | strengths in MPa | rho in kg/m3 | alpha in 1e-6/K
    =================================================================== */
 const FIBERS = {
-  carbon_hr: {name:"Carbon HR (T300 / AS4)", EL:230, ET:40, G:15,  nu:0.30, rho:1800, st:4900, sc:1800, a1:-0.5, a2:10,
+  carbon_hr: {name:"Carbon HR (T300 / AS4)", EL:230, ET:18.4, G:16.6, G23:7.0, nu:0.24, rho:1800, st:4900, sc:1800, a1:-0.5, a2:10,
               col:0x131417, rec:{vf:0.58, lo:0.50, hi:0.65, proc:"infusion or prepreg"}},
-  carbon_im: {name:"Carbon IM (IM7 / T800)", EL:276, ET:50, G:20,  nu:0.30, rho:1780, st:5500, sc:2000, a1:-0.4, a2:9,
+  carbon_im: {name:"Carbon IM (IM7 / T800)", EL:276, ET:14.1, G:14.7, G23:5.6, nu:0.25, rho:1780, st:5500, sc:2000, a1:-0.4, a2:9,
               col:0x131417, rec:{vf:0.60, lo:0.55, hi:0.68, proc:"prepreg, autoclave"}},
-  carbon_hm: {name:"Carbon HM (M55J)",       EL:350, ET:70, G:25,  nu:0.35, rho:1750, st:2600, sc:1300, a1:-1.1, a2:12,
+  carbon_hm: {name:"Carbon HM (M40J)",       EL:377, ET:8,  G:12,  G23:3.0, nu:0.25, rho:1750, st:2600, sc:1300, a1:-1.1, a2:12,
               col:0x1C1E22, rec:{vf:0.58, lo:0.50, hi:0.65, proc:"prepreg"}},
-  glass_e:   {name:"E-glass",                EL:73,  ET:73, G:25,  nu:0.20, rho:2550, st:4500, sc:1200, a1:5.0,  a2:5.0, form:"mat",
+  glass_e:   {name:"E-glass",                EL:73,  ET:73, G:30.4, G23:30.4, nu:0.20, rho:2550, st:4500, sc:1200, a1:5.0,  a2:5.0, form:"mat",
               col:0xB2B9BE, rec:{vf:0.25, lo:0.18, hi:0.32, proc:"open mould, chopped strand mat"}},
-  glass_s:   {name:"S / R-glass",            EL:85,  ET:85, G:30,  nu:0.20, rho:2490, st:4800, sc:1300, a1:2.9,  a2:2.9, form:"mat",
+  glass_s:   {name:"S / R-glass",            EL:85,  ET:85, G:35.4, G23:35.4, nu:0.20, rho:2490, st:4800, sc:1300, a1:2.9,  a2:2.9, form:"mat",
               col:0xC7CED3, rec:{vf:0.28, lo:0.20, hi:0.35, proc:"open mould mat"}},
-  aramid:    {name:"Aramid (Kevlar 49)",     EL:124, ET:7,  G:2.8, nu:0.36, rho:1450, st:3600, sc:500,  a1:-2.0, a2:59,
+  aramid:    {name:"Aramid (Kevlar 49)",     EL:124, ET:7,  G:2.8, G23:2.0, nu:0.36, rho:1450, st:3600, sc:500,  a1:-2.0, a2:59,
               col:0xD4A62A, rec:{vf:0.55, lo:0.45, hi:0.60, proc:"infusion or prepreg"}},
-  basalt:    {name:"Basalt",                 EL:89,  ET:89, G:33,  nu:0.24, rho:2670, st:2800, sc:1100, a1:8.0,  a2:8.0,
+  basalt:    {name:"Basalt",                 EL:89,  ET:89, G:35.9, G23:35.9, nu:0.24, rho:2670, st:2800, sc:1100, a1:8.0,  a2:8.0,
               col:0x8A6F4B, rec:{vf:0.50, lo:0.40, hi:0.58, proc:"infusion"}},
-  flax:      {name:"Flax",                   EL:50,  ET:30, G:15,  nu:0.35, rho:1400, st:800,  sc:400,  a1:10,   a2:40,
+  flax:      {name:"Flax",                   EL:50,  ET:8,  G:3.0, G23:2.5, nu:0.30, rho:1400, st:800,  sc:400,  a1:10,   a2:40,
               col:0xCBB58C, rec:{vf:0.40, lo:0.30, hi:0.50, proc:"infusion, natural fiber"}}
 };
 const CUSTOM_COL = 0x7E848A;
@@ -447,8 +530,11 @@ const RESINS = {
   polyester: {name:"Polyester",                 E:3.20, nu:0.38, rho:1200, st:60,  sc:55,  a:90},
   vinyl:     {name:"Vinyl ester",               E:3.50, nu:0.37, rho:1150, st:75,  sc:80,  a:80},
   peek:      {name:"PEEK (thermoplastic)",      E:3.70, nu:0.38, rho:1300, st:100, sc:110, a:47},
-  pa6:       {name:"PA6 (thermoplastic)",       E:2.00, nu:0.39, rho:1140, st:75,  sc:80,  a:85}
+  pa6:       {name:"PA6 (thermoplastic)",       E:2.00, nu:0.39, rho:1140, st:75,  sc:80,  a:85},
+  custom:    {name:"Custom resin",              E:3.45, nu:0.40, rho:1150, st:95,  sc:90,  a:60}
 };
+const MAN_DEFAULT={E1:119,E2:7.2,G12:4.2,G23:3,nu12:0.25,nu23:0.40,
+                   rho:1550,a1:0,Xt:2130,Xc:1165,Yt:36,Yc:140,S12:65};
 /* Representative colour of each reinforcement, used for the 3D fibers and
    the layer thumbnails. */
 const FIBER_COLOR = {
@@ -488,6 +574,115 @@ function dominantPly(){
   const [fib,type]=(best||"carbon_hr|ud").split("|");
   return {fib,type};
 }
+/* Plain-language physical meaning, shown after a short hover. */
+const TIPS={
+  /* ply, fiber axes */
+  "E₁":"Stiffness along the fibers: how hard the ply is to stretch in the fiber direction. Dominated by the fibers.",
+  "E₂":"Stiffness across the fibers, in the ply plane. Mostly the matrix holding fibers side by side, so much lower than E₁.",
+  "E₃":"Stiffness through the thickness. Taken equal to E₂: across the fibers, nothing distinguishes in-plane from out-of-plane.",
+  "G₁₂":"Resistance to in-plane shear — fibers sliding past each other. Carried by the matrix, so low even for carbon.",
+  "G₁₃":"Shear between the fiber direction and the thickness. Governs how much a thick part shears when bent.",
+  "G₂₃":"Shear across the fibers through the thickness. Pure matrix, the softest shear direction of a UD ply.",
+  "ν₁₂":"Poisson ratio: pull along the fibers by 1 %, the ply narrows by ν₁₂ % across them.",
+  "ν₁₃":"How much the ply thins through the thickness when pulled along the fibers.",
+  "ν₂₃":"How much the ply thins through the thickness when pulled across the fibers.",
+  "ρ":"Density of the composite: fiber and resin weighted by their volume fractions.",
+  "α₁":"Thermal expansion along the fibers. Near zero, even slightly negative, for carbon: the fibers hold the resin back.",
+  "α₂":"Thermal expansion across the fibers. Close to the resin's, several times α₁ — the source of cure warping.",
+  "Xt":"Tensile strength along the fibers: the stress at which fibers break. The one strength set by the fiber itself.",
+  "Xc":"Compressive strength along the fibers. Fibers buckle in the matrix long before they crush, so far below Xt.",
+  "Yt":"Tensile strength across the fibers: the matrix cracking between fibers. The first thing to fail in most laminates.",
+  "Yc":"Compressive strength across the fibers. The matrix is confined between fibers, so it holds near its own strength.",
+  "S₁₂":"In-plane shear strength: the matrix tearing between fibers.",
+  "X+ / X−":"Tensile and compressive strength along the fibers.",
+  "Y+ / Y−":"Tensile and compressive strength across the fibers.",
+  "S":"In-plane shear strength of the ply.",
+  /* laminate */
+  "Ex":"Laminate stiffness when pulled along x, averaged over every ply. What a beam or plate feels in tension.",
+  "Ey":"Laminate stiffness when pulled along y.",
+  "Ez":"Through-thickness stiffness: plies stacked like springs in series, so close to the softest ply.",
+  "Gxy":"In-plane shear stiffness of the laminate. ±45° plies raise it sharply — that's what they are for.",
+  "Gxz":"Transverse shear stiffness in the x-z plane. Matters for thick or short parts in bending.",
+  "Gyz":"Transverse shear stiffness in the y-z plane.",
+  "νxy":"Pull the laminate along x by 1 %: it narrows by νxy % along y.",
+  "νyx":"Pull along y: contraction along x. Linked to νxy by the stiffness ratio.",
+  "νxz":"Thinning through the thickness when pulled along x.",
+  "νyz":"Thinning through the thickness when pulled along y.",
+  "extension–shear ηx":"Pull along x and the laminate also shears. Zero when every +θ ply has a −θ partner (balanced stack).",
+  "D₁₁":"Bending stiffness about y: how hard the plate is to curve along x. Plies far from the mid-plane count most.",
+  "D₂₂":"Bending stiffness about x: how hard the plate is to curve along y.",
+  "thickness h":"Total laminate thickness, sum of all plies.",
+  "density":"Average density of the stack.",
+  "areal weight":"Mass per square metre of laminate — the number that sizes a part's weight.",
+  "αx":"Laminate thermal expansion along x, per degree.",
+  "αy":"Laminate thermal expansion along y, per degree.",
+  "αz":"Through-thickness thermal expansion. Resin-dominated, much larger than in-plane.",
+  /* controls */
+  "reinforcement":"Share of the composite that is fiber. More fiber = stiffer and stronger, until the resin can no longer wet every fiber.",
+  "Vf":"Fiber volume fraction: share of the volume taken by fibers. What the mechanics uses.",
+  "Mf":"Fiber mass fraction: share of the weight that is fiber. What datasheets and the scale in the workshop give.",
+  "voids":"Air trapped in the laminate. Each percent costs stiffness and, above all, interlaminar strength.",
+  "warp":"Share of the fabric's fibers running in the warp direction. 0.5 = same fiber count both ways.",
+  "matrix":"The resin that holds the fibers together and transfers load between them.",
+  "Em":"Resin stiffness. Drives every property across the fibers and in shear.",
+  "num":"Resin Poisson ratio: how much it narrows when stretched.",
+  "rhom":"Resin density.",
+  "am":"Resin thermal expansion. Resins expand 10 to 50 times more than carbon fiber.",
+  "stm":"Resin tensile strength. Sets when a ply cracks across its fibers.",
+  "scm":"Resin compressive strength.",
+  "thickby":"Enter each ply thickness directly, or let it follow from the fiber areal weight and resin content.",
+  "angle":"Fiber direction of this ply, measured from x. 0° carries load along x, 90° across, ±45° in shear.",
+  "thk":"Ply thickness. Thicker plies weigh more and carry more load in proportion.",
+  "gsm":"Fiber areal weight: grams of dry fiber per square metre, as sold. Thickness follows from it and the resin content.",
+  "ptype":"UD: all fibers one way, stiffest. Woven: two directions interlaced, easier to drape. Mat: random short fibers, same properties every way.",
+  "pfiber":"Fiber material of this ply.",
+  "explode":"Separates the plies in the 3D view to see each one's fiber direction. Display only.",
+  "kind":"Shell: thin part meshed on its mid-surface, ply-by-ply results. Solid: 3D elements with one averaged material.",
+  "fmt":"Text format of the material card for your solver.",
+  "units":"Unit system of the exported values. Match it to the one your model is built in.",
+  "fpf":"First ply failure: load at which the weakest ply first cracks. The usable limit — the part is damaged, not broken.",
+  "lpf":"Last ply failure: load at which the last ply fails. Upper bound on the ultimate strength.",
+  "Σx+":"Average tensile stress along x the laminate can carry.",
+  "Σx−":"Average compressive stress along x the laminate can carry.",
+  "Σy+":"Average tensile stress along y the laminate can carry.",
+  "Σy−":"Average compressive stress along y the laminate can carry.",
+  "Σxy":"Average in-plane shear stress the laminate can carry.",
+  "tab-ply":"Properties of a single ply in its own fiber axes.",
+  "tab-shell":"Equivalent properties of the whole laminate as a thin plate: membrane, bending and the A B D matrices.",
+  "tab-solid":"One 3D material averaging the full thickness, for solid elements.",
+  "tab-strength":"Stress the laminate carries before plies start to fail.",
+  "tab-curves":"How each property changes when the load direction turns.",
+  "c-E":"Membrane stiffness along the load direction θ.",
+  "c-Ef":"Bending stiffness along θ. Differs from membrane when plies are not evenly spread through the thickness.",
+  "c-G":"In-plane shear stiffness for axes turned by θ.",
+  "c-nu":"Poisson ratio for a load along θ.",
+  "c-St":"Tensile load along θ at first ply failure.",
+  "c-Sc":"Compressive load along θ at first ply failure.",
+  /* bending set: same symbols, different physics */
+  "bend:Ex":"Apparent stiffness when the plate bends along x. Outer plies dominate, so it differs from the membrane Ex whenever the stack is not uniform through the thickness.",
+  "bend:Ey":"Apparent stiffness when the plate bends along y.",
+  "bend:Gxy":"Twisting stiffness of the plate — resistance to a torsion of the panel.",
+  "bend:νxy":"Poisson ratio in bending: anticlastic curvature along y when the plate is bent along x.",
+  "mirror":"Appends the stack in reverse so it is symmetric about its mid-plane. A symmetric laminate stays flat after cure and does not bend under in-plane load.",
+  "customply":"Use measured or datasheet ply values instead of the estimate from fiber and resin. Each custom layer keeps its own set.",
+  "userec":"Fiber content reached in practice for this reinforcement and process. Above it the resin can no longer wet every fiber.",
+  "preset":"Common stacking sequences to start from.",
+  "models":"Every formula behind the numbers, with up to three models per calculation to choose from and their sources."
+};
+/* properties that can be plotted against the loading direction */
+const CURVE_DEFS=[
+  {key:"E",  label:"E membrane",          grp:"mod", dash:"",    col:"#111213"},
+  {key:"Ef", label:"E bending",           grp:"mod", dash:"5 4", col:"#111213"},
+  {key:"G",  label:"G in-plane",          grp:"mod", dash:"",    col:"#A3A8AC"},
+  {key:"nu", label:"ν",                   grp:"nu",  dash:"",    col:"#111213"},
+  {key:"St", label:"σ tension",           grp:"str", dash:"",    col:"#111213"},
+  {key:"Sc", label:"σ compression",       grp:"str", dash:"5 4", col:"#A3A8AC"}
+];
+const CURVE_GROUPS={
+  mod:{title:"stiffness",                       unit:"GPa", dec:2},
+  str:{title:"strength · first ply failure",    unit:"MPa", dec:0},
+  nu: {title:"Poisson ratio",                   unit:"",    dec:3}
+};
 const FIBER_KEYS = Object.keys(FIBERS).concat(["custom"]);
 const fiberName = k => k==="custom" ? "Custom constants" : FIBERS[k].name;
 
@@ -501,12 +696,12 @@ const S = {
   msf:300,              // default fiber areal weight, g/m2
   thickMode:"mm",       // layer thickness given in mm, or derived from areal weight
   k:0.5,                // fabric warp ratio: 0.5 balanced, 1 = UD tape
-  man:{E1:119,E2:7.2,G12:4.2,G23:3,nu12:0.25,nu23:0.4,rho:1550,a1:0,
-       Xt:2130,Xc:1165,Yt:36,Yc:140,S12:65},
   plies:[
     {a:0, t:0.30, type:"ud",     fib:"carbon_hr", gsm:300, on:true},
     {a:0, t:0.25, type:"fabric", fib:"carbon_hr", gsm:200, on:true}
   ],
+  curves:{E:true,G:true},
+  models:{E2:"chamis", G12:"chamis", G23:"chamis", a2:"chamis", str:"barbero", fab:"clt", mat:"exact", fail:"tsaiwu"},
   sel:-1, explode:0, drag:false, tab:"ply", kind:"shell", fmt:"txt", unit:"mm", open:null
 };
 
@@ -535,10 +730,10 @@ function mfOf(fibKey){
 }
 /* ply thickness from fiber areal weight:
    e = MSf (1/df + (Mm/Mf)/dm),  MSf in kg/m2, d = density, e in mm */
-function plyThickness(fibKey,gsm){
+function plyThickness(fibKey,gsm,man){
   const ms=Math.max(10,gsm||S.msf)/1000;          // kg/m2 of reinforcement
   const Mf=Math.min(0.95,Math.max(0.05,mfOf(fibKey)));
-  if(fibKey==="custom") return ms/Mf/Math.max(100,S.man.rho)*1000;
+  if(fibKey==="custom") return ms/Mf/Math.max(100,(man||MAN_DEFAULT).rho)*1000;
   const f=FIBERS[fibKey], m=RESINS[S.res];
   return ms*(1000/f.rho + ((1-Mf)/Mf)*(1000/m.rho));
 }
@@ -549,33 +744,52 @@ function syncThickness(){
   if(S.thickMode!=="gsm") return;
   S.plies.forEach(p=>{
     if(!p.gsm) p.gsm=GSM_DEFAULT[p.type]||300;
-    p.t=Math.max(0.01,+plyThickness(p.fib,p.gsm).toFixed(4));
+    p.t=Math.max(0.01,+plyThickness(p.fib,p.gsm,p.man).toFixed(4));
   });
 }
 
 /* ---- UD ply: rule of mixtures ------------------------------------ */
+/* Halpin-Tsai: M = Mm (1 + xi eta Vf)/(1 - eta Vf), eta = (Mf/Mm - 1)/(Mf/Mm + xi) */
+function halpin(Mm,Mf,xi,vf){const r=Mf/Mm,e=(r-1)/(r+xi);return Mm*(1+xi*e*vf)/(1-e*vf);}
 function udLamina(fibKey){
-  const f=FIBERS[fibKey], m=matrixProps();
-  const vf=vfOf(fibKey), vv=S.vv, vm=Math.max(0.01,1-vf-vv);
-  const E1 = f.EL*vf + m.E*vm;                 // EL  = Ef.Vf + Em.Vm
-  const E2 = 1/(vf/f.ET + vm/m.E);             // 1/ET = Vf/EfT + Vm/Em
-  const G12= 1/(vf/f.G  + vm/m.G);             // 1/GLT = Vf/Gf + Vm/Gm
-  const nu12 = f.nu*vf + m.nu*vm;              // nuLT = nuf.Vf + num.Vm
-  let nu23 = E2/(2*G12)-1; nu23=Math.min(0.49,Math.max(0.20,nu23));
+  const f=FIBERS[fibKey], m=matrixProps(), M=S.models;
+  const vf=vfOf(fibKey), vv=S.vv, vm=Math.max(0.01,1-vf-vv), sq=Math.sqrt(vf);
+  const Gf23=f.G23||f.ET/2.6;
+  const E1  = f.EL*vf + m.E*vm;                                   // Voigt
+  const nu12= f.nu*vf + m.nu*vm;
+  const E2  = M.E2==="reuss"  ? 1/(vf/f.ET + vm/m.E)
+            : M.E2==="chamis" ? m.E/(1-sq*(1-m.E/f.ET))
+            :                   halpin(m.E,f.ET,2,vf);
+  const G12 = M.G12==="reuss" ? 1/(vf/f.G + vm/m.G)
+            : M.G12==="chamis"? m.G/(1-sq*(1-m.G/f.G))
+            :                   halpin(m.G,f.G,1,vf);              // = Hashin CCA
+  const G23 = M.G23==="reuss" ? 1/(vf/Gf23 + vm/m.G)
+            : M.G23==="chamis"? m.G/(1-sq*(1-m.G/Gf23))
+            :                   halpin(m.G,Gf23,1/(4-3*m.nu),vf);
+  let nu23 = E2/(2*G23)-1; nu23=Math.min(0.49,Math.max(0.15,nu23));
   const rho = f.rho*vf + m.rho*vm;
-  const a1 = (f.a1*f.EL*vf + m.a*m.E*vm)/(f.EL*vf + m.E*vm);
-  const a2 = f.a2*vf + m.a*vm;
-  /* strengths, Barbero model */
-  const Xt = f.st*(vf + vm*m.E/f.EL);
-  const Xc = 0.63*(G12*1e3)*(1-vf);
-  const Yt = m.st*(1-Math.cbrt(vf))*E2/m.E;
-  const Yc = m.st*(1-Math.sqrt(vf)*m.E/f.ET);
-  const S12= m.tau*(1-Math.sqrt(vf)*m.G/f.G);
-  return {E1,E2,E3:E2,G12,G13:G12,G23:G12,nu12,nu13:nu12,nu23,rho,a1,a2,a3:a2,
+  const a1 = (f.a1*f.EL*vf + m.a*m.E*vm)/(f.EL*vf + m.E*vm);      // Schapery
+  const a2 = M.a2==="rom"      ? f.a2*vf + m.a*vm
+           : M.a2==="schapery" ? (1+f.nu)*f.a2*vf + (1+m.nu)*m.a*vm - a1*nu12
+           :                     f.a2*sq + (1-sq)*(1+vf*m.nu*f.EL/E1)*m.a;
+  let Xt,Xc,Yt,Yc,S12;
+  if(M.str==="chamis"){
+    const k2=1-(sq-vf)*(1-m.E/f.ET), ks=1-(sq-vf)*(1-m.G/f.G);
+    Xt=vf*f.st;
+    Xc=Math.min(vf*f.sc, 10*m.tau+2.5*m.st, (m.G*1e3)/(1-vf*(1-m.G/f.G)));
+    Yt=k2*m.st; Yc=k2*m.sc; S12=ks*m.tau;
+  } else {                                                          // Barbero
+    Xt = f.st*(vf + vm*m.E/f.EL);
+    Xc = 0.63*(G12*1e3)*(1-vf);
+    Yt = m.st*(1-Math.cbrt(vf))*E2/m.E;
+    Yc = m.st*(1-sq*m.E/f.ET);
+    S12= m.tau*(1-sq*m.G/f.G);
+  }
+  return {E1,E2,E3:E2,G12,G13:G12,G23,nu12,nu13:nu12,nu23,rho,a1,a2,a3:a2,
           vf,mf:mfOf(fibKey),Xt,Xc,Yt,Yc,S12};
 }
-function customLamina(){
-  const u=S.man, m=matrixProps(), vf=S.mode==="vf"?S.vf:S.mf;
+function customLamina(man){
+  const u=Object.assign({},MAN_DEFAULT,man||{}), m=matrixProps(), vf=S.mode==="vf"?S.vf:S.mf;
   const E2=Math.max(.1,u.E2), G12=Math.max(.05,u.G12), G23=Math.max(.05,u.G23);
   return {E1:Math.max(.1,u.E1),E2,E3:E2,G12,G13:G12,G23,
     nu12:u.nu12,nu13:u.nu12,nu23:u.nu23,rho:Math.max(1,u.rho),
@@ -588,23 +802,37 @@ function customLamina(){
 }
 /* ---- balanced fabric --------------------------------------------- */
 function fabricLamina(ud){
-  const k=Math.min(1,Math.max(0,S.k));
-  const den = 1 - (ud.E2/ud.E1)*ud.nu12*ud.nu12;
-  const Ex = (k*ud.E1+(1-k)*ud.E2)/den;
-  const Ey = (k*ud.E2+(1-k)*ud.E1)/den;
-  const nuxy = ud.nu12/(k+(1-k)*ud.E1/ud.E2);
-  return {E1:Ex, E2:Ey, E3:ud.E2, G12:ud.G12, G13:ud.G12, G23:ud.G23,
+  const k=Math.min(1,Math.max(0,S.k)), M=S.models.fab;
+  let Ex,Ey,nuxy,Gxy=ud.G12;
+  if(M==="rom"){
+    Ex=k*ud.E1+(1-k)*ud.E2; Ey=k*ud.E2+(1-k)*ud.E1;
+    nuxy=ud.nu12/(k+(1-k)*ud.E1/ud.E2);
+  } else if(M==="poisson"){
+    const den=1-(ud.E2/ud.E1)*ud.nu12*ud.nu12;
+    Ex=(k*ud.E1+(1-k)*ud.E2)/den; Ey=(k*ud.E2+(1-k)*ud.E1)/den;
+    nuxy=ud.nu12/(k+(1-k)*ud.E1/ud.E2);
+  } else {                                     // cross-ply sub-laminate, CLT
+    const Q=Qmat(ud), Q11=Q[0][0], Q22=Q[1][1], Q12=Q[0][1];
+    const A11=k*Q11+(1-k)*Q22, A22=k*Q22+(1-k)*Q11, A12=Q12;
+    Ex=A11-A12*A12/A22; Ey=A22-A12*A12/A11; nuxy=A12/A22; Gxy=Q[2][2];
+  }
+  return {E1:Ex, E2:Ey, E3:ud.E2, G12:Gxy, G13:ud.G12, G23:ud.G23,
     nu12:nuxy, nu13:ud.nu12, nu23:ud.nu23, rho:ud.rho, vf:ud.vf, mf:ud.mf,
     a1:0.5*(ud.a1+ud.a2), a2:0.5*(ud.a1+ud.a2), a3:ud.a2,
     Xt:k*ud.Xt, Xc:ud.Xc, Yt:(1-k)*ud.Xt, Yc:ud.Xc, S12:ud.S12};
 }
-/* ---- random mat / chopped strand sheet --------------------------- */
 function matSheet(ud){
-  const Q=Qmat(ud), Q11=Q[0][0], Q22=Q[1][1], Q12=Q[0][1], Q66=Q[2][2];
-  const den=3*Q11+3*Q22+2*Q12+4*Q66;
-  const E=(Q11+Q22-2*Q12+4*Q66)*(Q11+Q22+2*Q12)/den;
-  const G=(Q11+Q22-2*Q12+4*Q66)/8;
-  let nu=(Q11+Q22+6*Q12-4*Q66)/den; nu=Math.min(0.48,Math.max(0.15,nu));
+  let E,G,nu;
+  if(S.models.mat==="approx"){
+    E=0.375*ud.E1+0.625*ud.E2; G=0.125*ud.E1+0.25*ud.E2; nu=E/(2*G)-1;
+  } else {
+    const Q=Qmat(ud), Q11=Q[0][0], Q22=Q[1][1], Q12=Q[0][1], Q66=Q[2][2];
+    const den=3*Q11+3*Q22+2*Q12+4*Q66;
+    E=(Q11+Q22-2*Q12+4*Q66)*(Q11+Q22+2*Q12)/den;
+    G=(Q11+Q22-2*Q12+4*Q66)/8;
+    nu=(Q11+Q22+6*Q12-4*Q66)/den;
+  }
+  nu=Math.min(0.48,Math.max(0.15,nu));
   const Gt=0.5*(ud.G12+ud.G23);
   /* strengths have no closed-form model: empirical fractions of the UD
      value, set on a mat-300 E-glass/polyester reference laminate */
@@ -648,6 +876,25 @@ function qbar(Q,deg){
 /* ---- laminate strengths --------------------------------------------
    unit membrane load -> mid-plane strains -> ply stresses in (x,y) then
    (L,T) -> Tsai-Hill.  FPF = first ply failure, FF = fiber failure. */
+/* load multiplier that brings one ply to its failure criterion */
+function plyLoadFactor(sL,sT,tLT,m){
+  const X=sL>=0?m.Xt:m.Xc, Y=sT>=0?m.Yt:m.Yc, Sv=m.S12;
+  const crit=S.models.fail;
+  if(crit==="maxstress"){
+    const r=v=>Math.abs(v)>1e-12?1/Math.abs(v):Infinity;
+    return Math.min(X*r(sL), Y*r(sT), Sv*r(tLT));
+  }
+  if(crit==="tsaihill"){
+    const d=(sL/X)**2 - sL*sT/(X*X) + (sT/Y)**2 + (tLT/Sv)**2;
+    return d>1e-18 ? 1/Math.sqrt(d) : Infinity;
+  }
+  /* Tsai-Wu, F12 = -1/2 sqrt(F11 F22) */
+  const F1=1/m.Xt-1/m.Xc, F2=1/m.Yt-1/m.Yc, F11=1/(m.Xt*m.Xc), F22=1/(m.Yt*m.Yc),
+        F66=1/(Sv*Sv), F12=-0.5*Math.sqrt(F11*F22);
+  const a=F11*sL*sL+F22*sT*sT+F66*tLT*tLT+2*F12*sL*sT, b=F1*sL+F2*sT;
+  if(a<1e-18) return b>1e-18?1/b:Infinity;
+  return (-b+Math.sqrt(b*b+4*a))/(2*a);
+}
 function strengths(A,h,layers){
   const ah=inv3(A).map(r=>r.map(v=>v*h));        // [A/h]^-1, 1/GPa
   const cases=[["\u03A3x+",[1,0,0]],["\u03A3x\u2212",[-1,0,0]],
@@ -663,9 +910,8 @@ function strengths(A,h,layers){
       const sL =  c*c*sg[0] + si*si*sg[1] + 2*c*si*sg[2];
       const sT = si*si*sg[0] +  c*c*sg[1] - 2*c*si*sg[2];
       const tLT= -c*si*sg[0] + c*si*sg[1] + (c*c-si*si)*sg[2];
-      const X=sL>=0?l.m.Xt:l.m.Xc, Y=sT>=0?l.m.Yt:l.m.Yc, Sv=l.m.S12;
-      const d=Math.sqrt((sL/X)**2+(sT/Y)**2+(tLT/Sv)**2);
-      if(d>1e-12){ const v=1/d;
+      const v=plyLoadFactor(sL,sT,tLT,l.m);
+      if(isFinite(v) && v>0){
         if(v<fpf){fpf=v;fpPly=k;}
         if(v>ff||ff===Infinity){ff=v;ffPly=k;}
       }
@@ -675,17 +921,18 @@ function strengths(A,h,layers){
 }
 function analyse(){
   const cache={}, mats=[];
-  const getMat=l=>{
-    const key=l.fib+"|"+l.type;
+  const getMat=(l,idx)=>{
+    const key=l.fib==="custom" ? "custom#"+idx+"|"+l.type : l.fib+"|"+l.type;
     if(!cache[key]){
-      const ud = l.fib==="custom" ? customLamina() : udLamina(l.fib);
+      const ud = l.fib==="custom" ? customLamina(l.man) : udLamina(l.fib);
       const p  = l.type==="fabric" ? fabricLamina(ud) : l.type==="mat" ? matSheet(ud) : ud;
-      cache[key]={id:mats.length+1,key,name:matName(l.fib,l.type),fib:l.fib,type:l.type,p};
+      const nm=matName(l.fib,l.type)+(l.fib==="custom"?"_"+(idx+1):"");
+      cache[key]={id:mats.length+1,key,name:nm,fib:l.fib,type:l.type,p};
       mats.push(cache[key]);
     }
     return cache[key];
   };
-  const layers=S.plies.map(l=>{const M=getMat(l);return {...l,m:M.p,matId:M.id,matName:M.name};});
+  const layers=S.plies.map((l,i)=>{const M=getMat(l,i);return {...l,m:M.p,matId:M.id,matName:M.name};});
   const h=layers.reduce((s,l)=>s+l.t,0)||1e-6;
   const A=[[0,0,0],[0,0,0],[0,0,0]],B=[[0,0,0],[0,0,0],[0,0,0]],D=[[0,0,0],[0,0,0],[0,0,0]];
   const As=[0,0]; const Nt=[0,0,0]; let rho=0,z=-h/2;
@@ -945,8 +1192,13 @@ const f=(x,d=2)=>{
   if(Math.abs(x)>=1e5||(Math.abs(x)<1e-3&&x!==0)) return x.toExponential(3);
   return x.toFixed(d);
 };
-const tbl=rows=>'<table class="res">'+rows.map(r=>
-  '<tr><td class="d">'+r[0]+'</td><td class="v">'+r[1]+'</td><td class="u">'+(r[2]||"")+'</td></tr>').join("")+'</table>';
+const tipAttr=(key,ctx)=>{
+  const base=String(key).split(" = ")[0].split(",")[0].trim();
+  const t=(ctx&&TIPS[ctx+":"+key])||TIPS[key]||TIPS[base];
+  return t?' data-tip="'+t.replace(/"/g,"&quot;")+'" data-tip-title="'+String(key).replace(/"/g,"&quot;")+'"':"";
+};
+const tbl=(rows,ctx)=>'<table class="res">'+rows.map(r=>
+  '<tr><td class="d"'+tipAttr(r[0],ctx)+'>'+r[0]+'</td><td class="v">'+r[1]+'</td><td class="u">'+(r[2]||"")+'</td></tr>').join("")+'</table>';
 const matHTML=(M,s,dec)=>'<div class="mat">'+M.map(r=>r.map(v=>{
   const x=v*s; const t=Math.abs(x)<1e-9?"0":(Math.abs(x)>=1e5?x.toExponential(2):x.toFixed(dec));
   return t.padStart(11);
@@ -985,7 +1237,7 @@ function renderShell(r){
       ["νxy",f(m.nuxy,3),""],["νyx",f(m.nuyx,3),""],["extension–shear ηx",f(m.etax,3),""]])+
     '<div class="sect">bending · from D</div>'+
     tbl([["Ex",f(fl.Ex,2),"GPa"],["Ey",f(fl.Ey,2),"GPa"],["Gxy",f(fl.Gxy,2),"GPa"],
-      ["νxy",f(fl.nuxy,3),""],["D₁₁",f(r.D[0][0]*1e3,1),"N·mm"],["D₂₂",f(r.D[1][1]*1e3,1),"N·mm"]])+
+      ["νxy",f(fl.nuxy,3),""],["D₁₁",f(r.D[0][0]*1e3,1),"N·mm"],["D₂₂",f(r.D[1][1]*1e3,1),"N·mm"]],"bend")+
     '<div class="sect">laminate</div>'+
     tbl([["thickness h",f(r.h,3),"mm"],["density",f(r.rho,0),"kg/m³"],
       ["areal weight",f(r.rho*r.h/1000,3),"kg/m²"],["αx",f(r.alpha[0],2),"10⁻⁶/K"],
@@ -1000,14 +1252,14 @@ function renderShell(r){
 function renderStrength(r){
   const rows=r.str.map(c=>{
     const fp=r.layers[c.fpPly], lp=r.layers[c.ffPly];
-    return '<tr><td class="d">'+c.name+'</td>'+
+    return '<tr><td class="d"'+tipAttr(c.name)+'>'+c.name+'</td>'+
       '<td class="v">'+f(c.fpf,0)+'</td><td class="u">MPa · ply '+(c.fpPly+1)+(fp?" @ "+fp.a+"°":"")+'</td>'+
       '<td class="v">'+f(c.ff,0)+'</td><td class="u">MPa · ply '+(c.ffPly+1)+(lp?" @ "+lp.a+"°":"")+'</td></tr>';
   }).join("");
   document.getElementById("t-strength").innerHTML=
     '<div class="sect">laminate strengths · Tsai-Hill</div>'+
     '<p class="mini">Unit membrane load → mid-plane strains through [A/h]⁻¹ → ply stresses rotated into the fiber axes, then (σ<sub>L</sub>/X)² + (σ<sub>T</sub>/Y)² + (τ<sub>LT</sub>/S)² = 1 solved ply by ply. X and Y take the tensile or compressive value according to the sign of the stress.</p>'+
-    '<table class="res"><tr><td class="u">load</td><td class="u" colspan="2">first ply failure</td><td class="u" colspan="2">last ply failure</td></tr>'+rows+'</table>'+
+    '<table class="res"><tr><td class="u">load</td><td class="u" colspan="2" data-tipkey="fpf" data-tip-title="first ply failure">first ply failure</td><td class="u" colspan="2" data-tipkey="lpf" data-tip-title="last ply failure">last ply failure</td></tr>'+rows+'</table>'+
     '<div class="note">First ply failure is the usable limit — the laminate is damaged but still carries load, much like the yield point of a metal. Last ply failure is the load at which the final ply group reaches the criterion, computed on the undamaged stiffness, so it is an upper bound.</div>'+
     '<details class="more"><summary>ply strengths used</summary>'+
     '<p class="mini" style="margin-top:8px">Barbero model for UD plies; woven and mat values are scaled estimates.</p>'+
@@ -1016,6 +1268,307 @@ function renderStrength(r){
            ["Y+ / Y−",f(M.p.Yt,0)+" / "+f(M.p.Yc,0),"MPa"],
            ["S",f(M.p.S12,0),"MPa"]])).join("")+
     '</details>';
+}
+/* ---- curves vs loading direction -----------------------------------
+   Rotating every ply by -theta and recomputing A, D gives the laminate as
+   seen by a load applied at theta from x. */
+let CURVES=null;
+function curveData(){
+  const r=analyse(), h=r.h, out=[], needStr=S.curves.St||S.curves.Sc;
+  for(let th=-90; th<=90; th+=1){
+    const lay=r.layers.map(l=>Object.assign({},l,{a:l.a-th}));
+    const A=[[0,0,0],[0,0,0],[0,0,0]], D=[[0,0,0],[0,0,0],[0,0,0]];
+    let z=-h/2;
+    for(const l of lay){
+      const zb=z, zt=z+l.t; z=zt;
+      const qb=qbar(Qmat(l.m),l.a);
+      for(let i=0;i<3;i++) for(let j=0;j<3;j++){
+        A[i][j]+=qb[i][j]*l.t;
+        D[i][j]+=qb[i][j]*(zt*zt*zt-zb*zb*zb)/3;
+      }
+    }
+    const a=inv3(A), d=inv3(D);
+    const pt={th, E:1/(a[0][0]*h), Ef:12/(d[0][0]*h*h*h), G:1/(a[2][2]*h), nu:-a[0][1]/a[0][0]};
+    if(needStr){ const st=strengths(A,h,lay); pt.St=st[0].fpf; pt.Sc=st[1].fpf; }
+    out.push(pt);
+  }
+  return out;
+}
+function niceTicks(lo,hi,n){
+  const span=Math.max(hi-lo,1e-9), raw=span/n, mag=Math.pow(10,Math.floor(Math.log10(raw))), q=raw/mag;
+  const step=(q<=1?1:q<=2?2:q<=2.5?2.5:q<=5?5:10)*mag;
+  const a=Math.floor(lo/step)*step, b=Math.ceil(hi/step)*step, t=[];
+  for(let v=a; v<=b+step*1e-6; v+=step) t.push(+v.toFixed(10));
+  return t;
+}
+const CW=350, CH=170, CL=46, CR=10, CT=8, CB=22;
+function chartFor(grp){
+  const defs=CURVE_DEFS.filter(d=>d.grp===grp && S.curves[d.key]);
+  const vals=[];
+  defs.forEach(d=>CURVES.forEach(p=>{ if(isFinite(p[d.key])) vals.push(p[d.key]); }));
+  let lo=Math.min(0,...vals), hi=Math.max(...vals);
+  if(!isFinite(hi)) hi=1;
+  if(hi-lo<1e-9) hi=lo+1;
+  const ticks=niceTicks(lo,hi,4); lo=ticks[0]; hi=ticks[ticks.length-1];
+  const pw=CW-CL-CR, ph=CH-CT-CB;
+  const X=th=>CL+(th+90)/180*pw, Y=v=>CT+ph-(v-lo)/(hi-lo)*ph;
+  const g=CURVE_GROUPS[grp];
+  let svg='<svg viewBox="0 0 '+CW+' '+CH+'">';
+  ticks.forEach(v=>{
+    svg+='<line class="'+(Math.abs(v)<1e-12?"zero":"grid")+'" x1="'+CL+'" x2="'+(CW-CR)+'" y1="'+Y(v)+'" y2="'+Y(v)+'"/>'+
+         '<text class="ax" x="'+(CL-6)+'" y="'+(Y(v)+3)+'" text-anchor="end">'+(+v.toFixed(g.dec>2?2:g.dec)).toString()+'</text>';
+  });
+  [-90,-45,0,45,90].forEach(t=>{
+    svg+='<line class="grid" x1="'+X(t)+'" x2="'+X(t)+'" y1="'+CT+'" y2="'+(CT+ph)+'"/>'+
+         '<text class="ax" x="'+X(t)+'" y="'+(CH-6)+'" text-anchor="middle">'+t+'°</text>';
+  });
+  if(g.unit) svg+='<text class="ax" x="'+CL+'" y="'+(CT-1)+'" dy="-1">'+g.unit+'</text>';
+  defs.forEach(d=>{
+    const pts=CURVES.filter(p=>isFinite(p[d.key])).map(p=>X(p.th).toFixed(1)+","+Y(p[d.key]).toFixed(1));
+    svg+='<polyline fill="none" stroke="'+d.col+'" stroke-width="1.6" stroke-linejoin="round"'+
+         (d.dash?' stroke-dasharray="'+d.dash+'"':'')+' points="'+pts.join(" ")+'"/>';
+  });
+  svg+='<line class="hl" x1="0" x2="0" y1="'+CT+'" y2="'+(CT+ph)+'" visibility="hidden"/>';
+  defs.forEach(d=>{ svg+='<circle class="hd" data-k="'+d.key+'" r="3.2" fill="#fff" stroke="'+d.col+'" stroke-width="1.6" visibility="hidden"/>'; });
+  svg+='<rect x="'+CL+'" y="'+CT+'" width="'+pw+'" height="'+ph+'" fill="transparent"/>';
+  svg+='</svg>';
+  const legend='<div class="legend">'+defs.map(d=>
+    '<span><svg viewBox="0 0 20 6"><line x1="0" x2="20" y1="3" y2="3" stroke="'+d.col+'" stroke-width="2"'+
+    (d.dash?' stroke-dasharray="'+d.dash.split(" ").map(x=>x/1.4).join(" ")+'"':'')+'/></svg>'+d.label+'</span>').join("")+'</div>';
+  return {html:'<div class="sect">'+g.title+'</div>'+legend+'<div class="chart" data-grp="'+grp+'">'+svg+'<div class="tip"></div></div>',
+          geo:{lo,hi,pw,ph,X,Y,defs,g}};
+}
+function renderCurves(){
+  const host=document.getElementById("t-curves");
+  if(S.tab!=="curves"||S.open!=="props"||!host) return;
+  CURVES=curveData();
+  const chips='<div class="btnrow curvesel">'+CURVE_DEFS.map(d=>
+    '<button class="chipbtn" data-curve="'+d.key+'" aria-pressed="'+(!!S.curves[d.key])+'" data-tipkey="c-'+d.key+'" data-tip-title="'+d.label+'">'+d.label+'</button>').join("")+'</div>';
+  const geos={}; let body="";
+  ["mod","str","nu"].forEach(grp=>{
+    if(CURVE_DEFS.some(d=>d.grp===grp && S.curves[d.key])){ const c=chartFor(grp); geos[grp]=c.geo; body+=c.html; }
+  });
+  host.innerHTML=chips+
+    '<p class="mini">Laminate properties for a load applied at angle θ from the x axis — every ply rotated by −θ, A and D rebuilt. Hover a curve for the values.</p>'+
+    (body||'<p class="mini">Select at least one property.</p>');
+  host.querySelectorAll("[data-curve]").forEach(b=>b.addEventListener("click",()=>{
+    const k=b.dataset.curve; S.curves[k]=!S.curves[k]; renderCurves();
+  }));
+  host.querySelectorAll(".chart").forEach(ch=>{
+    const G=geos[ch.dataset.grp], svg=ch.querySelector("svg"), tip=ch.querySelector(".tip");
+    const hl=svg.querySelector(".hl"), dots=svg.querySelectorAll(".hd");
+    const move=e=>{
+      const rc=svg.getBoundingClientRect();
+      const x=(e.clientX-rc.left)/rc.width*CW;
+      let th=(x-CL)/G.pw*180-90; th=Math.max(-90,Math.min(90,th));
+      const p=CURVES[Math.round(th+90)]; if(!p) return;
+      const px=G.X(p.th);
+      hl.setAttribute("x1",px); hl.setAttribute("x2",px); hl.setAttribute("visibility","visible");
+      dots.forEach(c=>{ const v=p[c.dataset.k];
+        if(isFinite(v)){ c.setAttribute("cx",px); c.setAttribute("cy",G.Y(v)); c.setAttribute("visibility","visible"); } });
+      tip.innerHTML='<i>θ</i> '+p.th+'°<br>'+G.defs.map(d=>'<i>'+d.label+'</i> '+
+        (isFinite(p[d.key])?(+p[d.key]).toFixed(G.g.dec):"—")+(G.g.unit?" "+G.g.unit:"")).join("<br>");
+      tip.style.display="block";
+      const left=px/CW*rc.width;
+      tip.style.left=(left>rc.width*0.55 ? left-tip.offsetWidth-10 : left+10)+"px";
+    };
+    ch.addEventListener("pointermove",move);
+    ch.addEventListener("pointerdown",move);
+    ch.addEventListener("pointerleave",()=>{
+      tip.style.display="none"; hl.setAttribute("visibility","hidden");
+      dots.forEach(c=>c.setAttribute("visibility","hidden"));
+    });
+  });
+}
+/* ===================================================================
+   MODELS WINDOW — every calculation, its formula, alternatives, sources
+   =================================================================== */
+const SCH=q=>"https://scholar.google.com/scholar?q="+encodeURIComponent(q);
+const L_ROM="https://en.wikipedia.org/wiki/Rule_of_mixtures";
+const L_HT="https://en.wikipedia.org/wiki/Halpin%E2%80%93Tsai_model";
+const L_HTREV="https://uio.no/studier/emner/matnat/math/nedlagte-emner/MEK4540/h09/undervisningsmateriale/halpintsai_review.pdf";
+const L_CHAMIS="https://ntrs.nasa.gov/citations/19830011546";
+const L_REVIEW="https://cdn.intechopen.com/pdfs/38411/InTech-Comparative_review_study_on_elastic_properties_modeling_for_unidirectional_composite_materials.pdf";
+const L_TW="https://en.wikipedia.org/wiki/Tsai%E2%80%93Wu_failure_criterion";
+const L_HILL="https://en.wikipedia.org/wiki/Hill_yield_criteria";
+const L_MFT="https://en.wikipedia.org/wiki/Material_failure_theory";
+const L_EXPL="https://explorecomposites.com/articles/design-for-composites/basic-numbers-and-calculations-for-composites/";
+const fr=(a,b)=>'<span class="fr"><span>'+a+'</span><span>'+b+'</span></span>';
+const sb=(x,i)=>x+'<sub>'+i+'</sub>';
+const Vf=sb("V","f"), Vm=sb("V","m"), Em=sb("E","m"), Gm=sb("G","m");
+const gp=x=>(x).toFixed(2)+" GPa";
+
+const MODELS=[
+ {id:"vf", title:"Fiber content", sub:"mass ↔ volume fraction", opts:[
+   {k:"x", tier:"exact", name:"Mass balance",
+    f:'<div>'+Vf+' = (1 − '+sb("V","v")+') '+fr(sb("M","f")+' ρ<sub>m</sub>','ρ<sub>f</sub> − (ρ<sub>f</sub> − ρ<sub>m</sub>) '+sb("M","f"))+'</div>',
+    note:"Follows directly from the masses and densities of fiber, resin and voids. No modelling choice involved.",
+    src:[["Explore Composites — basic numbers and calculations",L_EXPL]]}],
+   live:c=>"V<sub>f</sub> = "+(c.u.vf*100).toFixed(1)+" % · M<sub>f</sub> = "+(c.u.mf*100).toFixed(1)+" %"},
+ {id:"thk", title:"Ply thickness", sub:"from fiber areal weight", opts:[
+   {k:"x", tier:"exact", name:"Areal mass balance",
+    f:'<div>e = '+sb("MS","f")+' ('+fr("1","ρ<sub>f</sub>")+' + '+fr("1 − "+sb("M","f"),sb("M","f")+" ρ<sub>m</sub>")+')</div>',
+    note:"Mass of fiber per square metre divided out by the densities. Exact for a void-free ply.",
+    src:[["Explore Composites — basic numbers and calculations",L_EXPL]]}],
+   live:c=>"300 g/m² → e = "+plyThickness(c.fib,300).toFixed(3)+" mm"},
+ {id:"E1", title:"E₁", sub:"longitudinal modulus", opts:[
+   {k:"x", tier:"simplified", name:"Rule of mixtures (Voigt)",
+    f:'<div>'+sb("E","1")+' = '+sb("E","f1")+' '+Vf+' + '+Em+' '+Vm+'</div>',
+    note:"Fiber and matrix stretch together. Within a few percent of tests for continuous fibers, so no refined model is needed here.",
+    src:[["Rule of mixtures — Wikipedia",L_ROM]]}],
+   live:c=>"E₁ = "+gp(c.u.E1)},
+ {id:"nu12", title:"ν₁₂", sub:"major Poisson ratio", opts:[
+   {k:"x", tier:"simplified", name:"Rule of mixtures",
+    f:'<div>ν<sub>12</sub> = ν<sub>f</sub> '+Vf+' + ν<sub>m</sub> '+Vm+'</div>',
+    note:"Same equal-strain assumption as E₁, and just as reliable.",
+    src:[["Rule of mixtures — Wikipedia",L_ROM]]}],
+   live:c=>"ν₁₂ = "+c.u.nu12.toFixed(3)},
+ {id:"E2", title:"E₂", sub:"transverse modulus", opts:[
+   {k:"reuss", tier:"simplified", name:"Inverse rule of mixtures (Reuss)",
+    f:'<div>'+fr("1",sb("E","2"))+' = '+fr(Vf,sb("E","f2"))+' + '+fr(Vm,Em)+'</div>',
+    note:"Fiber and matrix carry the same stress, as if stacked in series. A lower bound — typically 20 to 30 % below tests.",
+    src:[["Rule of mixtures — Wikipedia",L_ROM]]},
+   {k:"ht", tier:"medium", name:"Halpin–Tsai, ξ = 2",
+    f:'<div>'+sb("E","2")+' = '+Em+' '+fr("1 + ξη"+Vf,"1 − η"+Vf)+',&ensp;η = '+fr(sb("E","f2")+"/"+Em+" − 1",sb("E","f2")+"/"+Em+" + ξ")+'</div>',
+    note:"Curve fit to elasticity solutions. ξ = 2 for circular fibers; ξ → 0 gives Reuss, ξ → ∞ gives Voigt.",
+    src:[["Halpin–Tsai model — Wikipedia",L_HT],["Halpin & Kardos, The Halpin–Tsai equations: a review (1976)",L_HTREV]]},
+   {k:"chamis", tier:"complex", rec:1, name:"Chamis (NASA)",
+    f:'<div>'+sb("E","2")+' = '+fr(Em,"1 − √"+Vf+" (1 − "+Em+"/"+sb("E","f2")+")")+'</div>',
+    note:"Square-packed fiber in a sub-region model, using the fiber's own transverse modulus. Best agreement with tests at V<sub>f</sub> ≥ 0.6 in comparative reviews.",
+    src:[["Chamis, NASA TM-83320 (1983)",L_CHAMIS],["Comparative review of UD elastic models (InTech)",L_REVIEW]]}],
+   live:c=>"E₂ = "+gp(c.u.E2)},
+ {id:"G12", title:"G₁₂", sub:"in-plane shear modulus", opts:[
+   {k:"reuss", tier:"simplified", name:"Inverse rule of mixtures (Reuss)",
+    f:'<div>'+fr("1",sb("G","12"))+' = '+fr(Vf,sb("G","f"))+' + '+fr(Vm,Gm)+'</div>',
+    note:"Series assumption again: a lower bound, well below tests.",
+    src:[["Rule of mixtures — Wikipedia",L_ROM]]},
+   {k:"ht", tier:"medium", name:"Halpin–Tsai, ξ = 1",
+    f:'<div>'+sb("G","12")+' = '+Gm+' '+fr("("+sb("G","f")+" + "+Gm+") + "+Vf+" ("+sb("G","f")+" − "+Gm+")","("+sb("G","f")+" + "+Gm+") − "+Vf+" ("+sb("G","f")+" − "+Gm+")")+'</div>',
+    note:"With ξ = 1, Halpin–Tsai is identical to Hashin's composite-cylinder assemblage — the exact elasticity result for axial shear.",
+    src:[["Halpin–Tsai model — Wikipedia",L_HT],["Hashin & Rosen, elastic moduli of fiber-reinforced materials (1964)",SCH("Hashin Rosen 1964 elastic moduli of fiber-reinforced materials")]]},
+   {k:"chamis", tier:"complex", rec:1, name:"Chamis (NASA)",
+    f:'<div>'+sb("G","12")+' = '+fr(Gm,"1 − √"+Vf+" (1 − "+Gm+"/"+sb("G","f12")+")")+'</div>',
+    note:"Same sub-region approach as for E₂. Closest to measured carbon/epoxy shear moduli.",
+    src:[["Chamis, NASA TM-83320 (1983)",L_CHAMIS],["Comparative review of UD elastic models (InTech)",L_REVIEW]]}],
+   live:c=>"G₁₂ = "+gp(c.u.G12)},
+ {id:"G23", title:"G₂₃ → ν₂₃", sub:"transverse shear, through-thickness Poisson", opts:[
+   {k:"reuss", tier:"simplified", name:"Inverse rule of mixtures",
+    f:'<div>'+fr("1",sb("G","23"))+' = '+fr(Vf,sb("G","f23"))+' + '+fr(Vm,Gm)+'</div><div>ν<sub>23</sub> = '+fr(sb("E","2"),"2 "+sb("G","23"))+' − 1</div>',
+    note:"Lower bound. ν₂₃ then follows from transverse isotropy of the ply.",
+    src:[["Rule of mixtures — Wikipedia",L_ROM]]},
+   {k:"ht", tier:"medium", name:"Halpin–Tsai, ξ = 1/(4 − 3ν<sub>m</sub>)",
+    f:'<div>'+sb("G","23")+' = '+Gm+' '+fr("1 + ξη"+Vf,"1 − η"+Vf)+',&ensp;ξ = '+fr("1","4 − 3ν<sub>m</sub>")+'</div><div>ν<sub>23</sub> = '+fr(sb("E","2"),"2 "+sb("G","23"))+' − 1</div>',
+    note:"Tsai–Hahn reinforcement factor. Tends to underestimate G₂₃, which can push ν₂₃ to the 0.49 cap.",
+    src:[["Halpin & Kardos (1976)",L_HTREV],["Tsai & Hahn, Introduction to Composite Materials",SCH("Tsai Hahn Introduction to Composite Materials 1980")]]},
+   {k:"chamis", tier:"complex", rec:1, name:"Chamis (NASA)",
+    f:'<div>'+sb("G","23")+' = '+fr(Gm,"1 − √"+Vf+" (1 − "+Gm+"/"+sb("G","f23")+")")+'</div><div>ν<sub>23</sub> = '+fr(sb("E","2"),"2 "+sb("G","23"))+' − 1</div>',
+    note:"Rated best for G₂₃ in comparative studies. ν₂₃ is limited to 0.49 to keep the 3D set positive definite.",
+    src:[["Chamis, NASA TM-83320 (1983)",L_CHAMIS],["Comparative review of UD elastic models (InTech)",L_REVIEW]]}],
+   live:c=>"G₂₃ = "+gp(c.u.G23)+" · ν₂₃ = "+c.u.nu23.toFixed(3)},
+ {id:"a2", title:"α₂", sub:"transverse thermal expansion — α₁ always Schapery", opts:[
+   {k:"rom", tier:"simplified", name:"Rule of mixtures",
+    f:'<div>α<sub>2</sub> = α<sub>f2</sub> '+Vf+' + α<sub>m</sub> '+Vm+'</div><div>α<sub>1</sub> = '+fr("α<sub>f1</sub> "+sb("E","f1")+" "+Vf+" + α<sub>m</sub> "+Em+" "+Vm,sb("E","f1")+" "+Vf+" + "+Em+" "+Vm)+'</div>',
+    note:"Ignores the Poisson coupling between the phases.",
+    src:[["Rule of mixtures — Wikipedia",L_ROM]]},
+   {k:"schapery", tier:"medium", name:"Schapery (energy bounds)",
+    f:'<div>α<sub>2</sub> = (1 + ν<sub>f</sub>) α<sub>f2</sub> '+Vf+' + (1 + ν<sub>m</sub>) α<sub>m</sub> '+Vm+' − α<sub>1</sub> ν<sub>12</sub></div>',
+    note:"Energy-based bound, includes the Poisson coupling. Tends to overestimate α₂ for carbon/epoxy.",
+    src:[["Schapery, Thermal expansion coefficients of composite materials (1968)",SCH("Schapery 1968 thermal expansion coefficients of composite materials based on energy principles")]]},
+   {k:"chamis", tier:"complex", rec:1, name:"Chamis (NASA)",
+    f:'<div>α<sub>2</sub> = α<sub>f2</sub> √'+Vf+' + (1 − √'+Vf+') (1 + '+Vf+' ν<sub>m</sub> '+fr(sb("E","f1"),sb("E","1"))+') α<sub>m</sub></div>',
+    note:"Closest to measured carbon/epoxy values (≈ 26–30 × 10⁻⁶/K).",
+    src:[["Chamis, NASA TM-83320 (1983)",L_CHAMIS]]}],
+   live:c=>"α₁ = "+c.u.a1.toFixed(2)+" · α₂ = "+c.u.a2.toFixed(1)+" × 10⁻⁶/K"},
+ {id:"str", title:"UD ply strengths", sub:"X⁺ X⁻ Y⁺ Y⁻ S", opts:[
+   {k:"barbero", tier:"medium", rec:1, name:"Barbero",
+    f:'<div>X⁺ = σ<sub>f</sub> ('+Vf+' + '+Vm+' '+Em+'/'+sb("E","f1")+')</div><div>X⁻ = 0.63 '+sb("G","12")+' (1 − '+Vf+')</div><div>Y⁺ = σ<sub>m</sub> (1 − '+Vf+'<sup>1/3</sup>) '+sb("E","2")+'/'+Em+'</div><div>Y⁻ = σ<sub>m</sub> (1 − √'+Vf+' '+Em+'/'+sb("E","f2")+')</div><div>S = τ<sub>m</sub> (1 − √'+Vf+' '+Gm+'/'+sb("G","f")+')</div>',
+    note:"X⁻ from fiber micro-buckling, Y⁺ with the strain concentration of fiber packing. τ<sub>m</sub> = σ<sub>m</sub>/√3.",
+    src:[["Barbero, Introduction to Composite Materials Design",SCH("Barbero Introduction to Composite Materials Design")]]},
+   {k:"chamis", tier:"complex", name:"Chamis (NASA)",
+    f:'<div>X⁺ = '+Vf+' σ<sub>f</sub></div><div>X⁻ = min[ '+Vf+' σ<sub>fc</sub> ; 10 τ<sub>m</sub> + 2.5 σ<sub>m</sub> ; '+fr(Gm,"1 − "+Vf+" (1 − "+Gm+"/"+sb("G","f")+")")+' ]</div><div>Y<sup>±</sup> = [1 − (√'+Vf+' − '+Vf+')(1 − '+Em+'/'+sb("E","f2")+')] σ<sub>m</sub><sup>±</sup></div><div>S = [1 − (√'+Vf+' − '+Vf+')(1 − '+Gm+'/'+sb("G","f")+')] τ<sub>m</sub></div>',
+    note:"X⁻ takes the weakest of fiber crushing, shear delamination and micro-buckling. Y⁺ comes out higher than Barbero — optimistic against tests.",
+    src:[["Chamis, NASA TM-83320 (1983)",L_CHAMIS]]}],
+   live:c=>"X⁺ "+c.u.Xt.toFixed(0)+" · X⁻ "+c.u.Xc.toFixed(0)+" · Y⁺ "+c.u.Yt.toFixed(0)+" · Y⁻ "+c.u.Yc.toFixed(0)+" · S "+c.u.S12.toFixed(0)+" MPa"},
+ {id:"fab", title:"Woven ply", sub:"k = warp share", opts:[
+   {k:"rom", tier:"simplified", name:"Weighted mixture",
+    f:'<div>'+sb("E","X")+' = k '+sb("E","1")+' + (1 − k) '+sb("E","2")+'</div><div>ν<sub>XY</sub> = '+fr("ν<sub>12</sub>","k + (1 − k) "+sb("E","1")+"/"+sb("E","2"))+',&ensp;'+sb("G","XY")+' = '+sb("G","12")+'</div>',
+    note:"Each direction carries its share of the fibers; the Poisson interaction is ignored.",
+    src:[["Gay, Matériaux composites",SCH("Gay Matériaux composites tissu équilibré")]]},
+   {k:"poisson", tier:"medium", name:"Mixture with Poisson term",
+    f:'<div>'+sb("E","X")+' = '+fr("k "+sb("E","1")+" + (1 − k) "+sb("E","2"),"1 − ν<sub>12</sub><sup>2</sup> "+sb("E","2")+"/"+sb("E","1"))+'</div>',
+    note:"Adds the plane-stress Poisson factor of the plies. Slightly high: it neglects the coupling between the two directions.",
+    src:[["Gay, Matériaux composites",SCH("Gay Matériaux composites tissu équilibré")]]},
+   {k:"clt", tier:"complex", rec:1, name:"Cross-ply sub-laminate (CLT)",
+    f:'<div>'+sb("A","11")+' = k '+sb("Q","11")+' + (1 − k) '+sb("Q","22")+',&ensp;'+sb("A","22")+' = k '+sb("Q","22")+' + (1 − k) '+sb("Q","11")+',&ensp;'+sb("A","12")+' = '+sb("Q","12")+'</div><div>'+sb("E","X")+' = '+sb("A","11")+' − '+fr(sb("A","12")+"<sup>2</sup>",sb("A","22"))+',&ensp;ν<sub>XY</sub> = '+fr(sb("A","12"),sb("A","22"))+',&ensp;'+sb("G","XY")+' = '+sb("Q","66")+'</div>',
+    note:"Treats the fabric as a [0/90] laminate in the right proportions — exact within lamination theory. Fiber crimp is not included.",
+    src:[["Mital & Chamis, simplified micromechanics of plain weave (NASA TM-107165)","https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/19960017575.pdf"]]}],
+   live:c=>"E<sub>X</sub> = "+gp(c.fab.E1)+" · ν<sub>XY</sub> = "+c.fab.nu12.toFixed(3)},
+ {id:"mat", title:"Random mat", sub:"chopped strands, in-plane isotropic", opts:[
+   {k:"approx", tier:"simplified", name:"3/8 – 5/8 rule",
+    f:'<div>E = '+fr("3","8")+' '+sb("E","1")+' + '+fr("5","8")+' '+sb("E","2")+',&ensp;G = '+fr("1","8")+' '+sb("E","1")+' + '+fr("1","4")+' '+sb("E","2")+'</div>',
+    note:"Classic approximation of the orientation average. Slightly high.",
+    src:[["Halpin & Kardos (1976)",L_HTREV]]},
+   {k:"exact", tier:"medium", rec:1, name:"Orientation average (Tsai–Pagano)",
+    f:'<div>E = '+fr("(Q<sub>11</sub> + Q<sub>22</sub> − 2Q<sub>12</sub> + 4Q<sub>66</sub>)(Q<sub>11</sub> + Q<sub>22</sub> + 2Q<sub>12</sub>)","3Q<sub>11</sub> + 3Q<sub>22</sub> + 2Q<sub>12</sub> + 4Q<sub>66</sub>")+'</div><div>G = '+fr("1","8")+' (Q<sub>11</sub> + Q<sub>22</sub> − 2Q<sub>12</sub> + 4Q<sub>66</sub>)</div>',
+    note:"Exact average of the UD ply stiffness over all in-plane angles, from the lamination invariants.",
+    src:[["Tsai & Pagano, invariant properties of composite materials (1968)",SCH("Tsai Pagano 1968 invariant properties of composite materials")]]}],
+   live:c=>"E = "+gp(c.mat.E1)+" · G = "+gp(c.mat.G12)},
+ {id:"clt", title:"Laminate stiffness", sub:"A, B, D", opts:[
+   {k:"x", tier:"standard", name:"Classical lamination theory",
+    f:'<div>'+sb("A","ij")+' = Σ '+sb("Q̄","ij")+'<sup>k</sup> ('+sb("z","k")+' − '+sb("z","k−1")+')</div><div>'+sb("B","ij")+' = '+fr("1","2")+' Σ '+sb("Q̄","ij")+'<sup>k</sup> ('+sb("z","k")+'<sup>2</sup> − '+sb("z","k−1")+'<sup>2</sup>),&ensp;'+sb("D","ij")+' = '+fr("1","3")+' Σ '+sb("Q̄","ij")+'<sup>k</sup> ('+sb("z","k")+'<sup>3</sup> − '+sb("z","k−1")+'<sup>3</sup>)</div>',
+    note:"Kirchhoff plate kinematics, plane stress in each ply. The universal basis of shell composite modelling.",
+    src:[["Jones, Mechanics of Composite Materials",SCH("Jones Mechanics of Composite Materials classical lamination theory")]]}],
+   live:c=>"E<sub>x</sub> membrane = "+gp(c.r.membrane.Ex)},
+ {id:"fail", title:"Ply failure criterion", sub:"used for the strength tab and curves", opts:[
+   {k:"maxstress", tier:"simplified", name:"Maximum stress",
+    f:'<div>λ = min( '+fr("X","|σ<sub>1</sub>|")+' , '+fr("Y","|σ<sub>2</sub>|")+' , '+fr("S","|τ<sub>12</sub>|")+' )</div>',
+    note:"Each stress against its own limit, no interaction. Tells you the failure mode, but is optimistic under combined stresses.",
+    src:[["Material failure theory — Wikipedia",L_MFT]]},
+   {k:"tsaihill", tier:"medium", name:"Tsai–Hill",
+    f:'<div>'+fr("σ<sub>1</sub><sup>2</sup>","X<sup>2</sup>")+' − '+fr("σ<sub>1</sub>σ<sub>2</sub>","X<sup>2</sup>")+' + '+fr("σ<sub>2</sub><sup>2</sup>","Y<sup>2</sup>")+' + '+fr("τ<sub>12</sub><sup>2</sup>","S<sup>2</sup>")+' = 1</div>',
+    note:"Hill's anisotropic yield surface applied to strength. One quadratic, X and Y switched by the sign of the stress.",
+    src:[["Hill yield criteria — Wikipedia",L_HILL]]},
+   {k:"tsaiwu", tier:"complex", rec:1, name:"Tsai–Wu",
+    f:'<div>F<sub>1</sub>σ<sub>1</sub> + F<sub>2</sub>σ<sub>2</sub> + F<sub>11</sub>σ<sub>1</sub><sup>2</sup> + F<sub>22</sub>σ<sub>2</sub><sup>2</sup> + F<sub>66</sub>τ<sub>12</sub><sup>2</sup> + 2F<sub>12</sub>σ<sub>1</sub>σ<sub>2</sub> = 1</div><div>F<sub>1</sub> = '+fr("1","X<sup>+</sup>")+' − '+fr("1","X<sup>−</sup>")+',&ensp;F<sub>11</sub> = '+fr("1","X<sup>+</sup>X<sup>−</sup>")+',&ensp;F<sub>12</sub> = −'+fr("1","2")+'√(F<sub>11</sub>F<sub>22</sub>)</div>',
+    note:"Full tensor polynomial with linear terms, so tension and compression differ naturally. The default in most FE solvers.",
+    src:[["Tsai–Wu failure criterion — Wikipedia",L_TW]]}],
+   live:c=>"Σx⁺ first ply = "+c.r.str[0].fpf.toFixed(0)+" MPa"},
+ {id:"solid", title:"3D homogenisation", sub:"solid elements", opts:[
+   {k:"x", tier:"standard", name:"Series / parallel averaging",
+    f:'<div>'+fr("1",sb("E","z"))+' = '+fr("1","h")+' Σ '+fr(sb("t","k"),sb("E","3")+"<sup>k</sup>")+',&ensp;'+sb("G","xz")+' = '+fr("1","h")+' Σ ('+sb("G","13")+' c<sup>2</sup> + '+sb("G","23")+' s<sup>2</sup>) '+sb("t","k")+'</div>',
+    note:"In-plane terms from A/h; plies in series through the thickness, in parallel for transverse shear.",
+    src:[["Sun & Li, 3D effective elastic constants for thick laminates (1988)",SCH("Sun Li 1988 three-dimensional effective elastic constants for thick laminates")]]}],
+   live:c=>"E<sub>z</sub> = "+gp(c.r.solid.Ez)}
+];
+function modelsSummary(){
+  return MODELS.filter(b=>b.opts.length>1).map(b=>{
+    const o=b.opts.find(x=>x.k===S.models[b.id])||b.opts[0];
+    return b.title.replace(/<[^>]+>/g,"")+" "+o.name.replace(/<[^>]+>/g,"");
+  }).join(" · ");
+}
+function renderModels(){
+  const win=document.getElementById("p-models");
+  if(!win || win.hidden) return;
+  const d=dominantPly();
+  const fib=d.fib==="custom"?"carbon_hr":d.fib;
+  const u=udLamina(fib);
+  const c={fib, u, fab:fabricLamina(u), mat:matSheet(u), r:analyse()};
+  const ctx=fiberName(fib)+" / "+RESINS[S.res].name.split(",")[0]+", V<sub>f</sub> "+(u.vf*100).toFixed(0)+" %";
+  document.getElementById("modelsBody").innerHTML=
+    '<p class="mintro">Calculation chain from constituents to laminate. Where several models exist, pick one on the left — the whole app recalculates. ✓ marks the recommended choice. Live values for '+ctx+'.</p>'+
+    MODELS.map(b=>{
+      const sel=b.opts.length>1?S.models[b.id]:b.opts[0].k;
+      const o=b.opts.find(x=>x.k===sel)||b.opts[0];
+      return '<div class="mblock"><div class="mtitle">'+b.title+' <span>· '+b.sub+'</span></div><div class="mrow">'+
+        '<div class="mopts">'+b.opts.map(x=>
+          '<button class="mopt" data-blk="'+b.id+'" data-k="'+x.k+'" aria-pressed="'+(x.k===sel)+'"'+(b.opts.length<2?" disabled":"")+'>'+
+          '<span class="tier">'+x.tier+(x.rec?'<span class="rec">✓ rec.</span>':'')+'</span>'+x.name+'</button>').join("")+'</div>'+
+        '<div><div class="fx">'+o.f+'</div>'+
+          (b.live?'<div class="mlive">'+b.live(c)+'</div>':'')+
+          '<p class="mnote">'+o.note+'</p>'+
+          '<div class="msrc">'+o.src.map(sr=>'<a href="'+sr[1]+'" target="_blank" rel="noopener noreferrer">'+sr[0]+' ↗</a>').join("")+'</div>'+
+        '</div></div></div>';
+    }).join("");
 }
 function renderSolid(r){
   const s=r.solid;
@@ -1062,6 +1615,7 @@ function expTxt(r){
   L.push("LAMINATE  "+notation());
   L.push("Matrix    "+RESINS[S.res].name+"   ("+(S.mode==="vf"?"Vf":"Mf")+" = "+((S.mode==="vf"?S.vf:S.mf)*100).toFixed(0)+"%, Vv = "+(S.vv*100).toFixed(1)+"%)");
   L.push("Thickness "+nb(r.h*U.L)+" "+U.Lu+"   |   "+r.layers.length+" plies   |   units: "+U.sys);
+  L.push("Models    "+modelsSummary());
   L.push("");
   if(S.kind==="shell"){
     L.push("-- PLY MATERIALS (axes 1-2-3, 1 = fiber) --");
@@ -1263,6 +1817,17 @@ function thumb(p){
 }
 const EYE_ON='<svg viewBox="0 0 24 24"><path d="M2 12s3.8-6.5 10-6.5S22 12 22 12s-3.8 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg>';
 const EYE_OFF='<svg viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.6 5.2A9 9 0 0 1 21 12a9.5 9.5 0 0 1-3.1 3.9M6.2 6.3A9.6 9.6 0 0 0 3 12a9 9 0 0 0 12 5.6"/></svg>';
+const MAN_FIELDS=[["E1","E₁","GPa"],["E2","E₂","GPa"],["G12","G₁₂","GPa"],["G23","G₂₃","GPa"],
+  ["nu12","ν₁₂",""],["nu23","ν₂₃",""],["rho","ρ","kg/m³"],["a1","α₁","10⁻⁶/K"],
+  ["Xt","X⁺","MPa"],["Xc","X⁻","MPa"],["Yt","Y⁺","MPa"],["Yc","Y⁻","MPa"],["S12","S","MPa"]];
+function manEditor(p,i){
+  const m=Object.assign({},MAN_DEFAULT,p.man||{});
+  return '<details class="manbox"'+(S.sel===i?" open":"")+'><summary data-tipkey="customply" data-tip-title="custom ply constants">custom ply constants</summary><div class="mangrid">'+
+    MAN_FIELDS.map(([k,lab,u])=>'<label><span>'+lab+'</span>'+
+      '<input type="number" step="'+(k.indexOf("nu")===0?"0.01":"0.1")+'" value="'+m[k]+'" data-i="'+i+'" data-man="'+k+'"'+
+      tipAttr({E1:"E₁",E2:"E₂",G12:"G₁₂",G23:"G₂₃",nu12:"ν₁₂",nu23:"ν₂₃",rho:"ρ",a1:"α₁",Xt:"Xt",Xc:"Xc",Yt:"Yt",Yc:"Yc",S12:"S₁₂"}[k])+'></label>').join("")+
+    '</div></details>';
+}
 function typeOptions(p){
   const opts = isGlass(p.fib) ? [["mat","mat sheet"]] : [["ud","UD"],["fabric","woven"]];
   return opts.map(([v,t])=>'<option value="'+v+'"'+(p.type===v?" selected":"")+'>'+t+'</option>').join("");
@@ -1274,18 +1839,19 @@ function renderLayers(){
         '<button class="eye" data-eye="'+i+'" title="show or hide in the view">'+(p.on===false?EYE_OFF:EYE_ON)+'</button>'+
         thumb(p)+
         '<span class="num">'+(i+1)+'</span>'+
-        '<input type="number" step="15" min="-90" max="90" value="'+p.a+'" data-i="'+i+'" data-k="a"'+(p.type==="mat"?" disabled":"")+'><u>°</u>'+
+        '<input type="number" step="15" min="-90" max="90" value="'+p.a+'" data-i="'+i+'" data-k="a" data-tipkey="angle" data-tip-title="ply angle"'+(p.type==="mat"?" disabled":"")+'><u>°</u>'+
         (S.thickMode==="gsm"
-          ? '<input type="number" step="10" min="10" value="'+(p.gsm||GSM_DEFAULT[p.type]||300)+'" data-i="'+i+'" data-k="gsm"><u>g/m²</u>'
-          : '<input type="number" step="0.01" min="0.01" value="'+p.t+'" data-i="'+i+'" data-k="t"><u>mm</u>')+
-        '<select class="type" data-i="'+i+'" data-k="type">'+typeOptions(p)+'</select>'+
+          ? '<input class="thk" type="number" step="10" min="10" value="'+(p.gsm||GSM_DEFAULT[p.type]||300)+'" data-i="'+i+'" data-k="gsm" data-tipkey="gsm" data-tip-title="areal weight"><u>g/m²</u>'
+          : '<input class="thk" type="number" step="0.01" min="0.01" value="'+(+p.t.toFixed(3))+'" data-i="'+i+'" data-k="t" data-tipkey="thk" data-tip-title="ply thickness"><u>mm</u>')+
+        '<select class="type" data-i="'+i+'" data-k="type" data-tipkey="ptype" data-tip-title="ply form">'+typeOptions(p)+'</select>'+
         '<button class="del" data-del="'+i+'" title="delete layer">✕</button>'+
       '</div>'+
-      '<div class="lfib"><select data-i="'+i+'" data-k="fib">'+
+      '<div class="lfib"><select data-i="'+i+'" data-k="fib" data-tipkey="pfiber" data-tip-title="reinforcement">'+
         FIBER_KEYS.map(k=>'<option value="'+k+'"'+(p.fib===k?" selected":"")+'>'+fiberName(k)+'</option>').join("")+
       '</select>'+
         (S.thickMode==="gsm"?'<span class="derived">'+p.t.toFixed(3)+' mm</span>':'')+
       '</div>'+
+      (p.fib==="custom"?manEditor(p,i):"")+
     '</div>').join("");
 }
 function update(rebuild=true){
@@ -1311,7 +1877,7 @@ function update(rebuild=true){
   document.getElementById("hOut").innerHTML = S.thickMode==="gsm"
     ? "h = <b>"+f(r.h,3)+" mm</b> from the grammages above: e = MS<sub>f</sub>(1/d<sub>f</sub> + CI/d<sub>m</sub>), CI = M<sub>m</sub>/M<sub>f</sub>. Change the resin or the fiber content and every thickness follows."
     : "h = <b>"+f(r.h,3)+" mm</b>, entered layer by layer.";
-  renderPly(r); renderShell(r); renderSolid(r); renderStrength(r); renderExport(r); fracLabel();
+  renderPly(r); renderShell(r); renderSolid(r); renderStrength(r); renderExport(r); fracLabel(); renderCurves(); renderModels();
   if(rebuild) buildStack(r);
   return r;
 }
@@ -1321,6 +1887,7 @@ function openPanel(name){
     document.getElementById("p-"+k).hidden=S.open!==k;
     document.getElementById("r-"+k).setAttribute("aria-expanded",String(S.open===k));
   });
+  renderCurves();
 }
 function seg(id,key,after){
   const el=document.getElementById(id);
@@ -1338,6 +1905,34 @@ document.getElementById("res").value=S.res;
 renderLayers(); initGL(); update(); openPanel("layers");
 document.getElementById("frac").value=S.vf; fracLabel();
 
+/* delayed explanation window */
+(function(){
+  const hint=document.getElementById("hint");
+  let timer=null, cur=null;
+  const textOf=el=>el.dataset.tip || TIPS[el.dataset.tipkey] || "";
+  function show(el){
+    const t=textOf(el); if(!t) return;
+    const title=el.dataset.tipTitle||"";
+    hint.innerHTML=(title?"<b>"+title+"</b>":"")+t;
+    hint.classList.add("on");
+    const r=el.getBoundingClientRect(), w=hint.offsetWidth, h=hint.offsetHeight;
+    let x=r.left, y=r.bottom+8;
+    if(x+w>innerWidth-10) x=innerWidth-w-10;
+    if(y+h>innerHeight-10) y=r.top-h-8;
+    hint.style.left=Math.max(10,x)+"px"; hint.style.top=Math.max(10,y)+"px";
+  }
+  function hide(){ clearTimeout(timer); timer=null; cur=null; hint.classList.remove("on"); }
+  document.addEventListener("mouseover",e=>{
+    const el=e.target&&e.target.closest?e.target.closest("[data-tip],[data-tipkey]"):null;
+    if(el===cur) return;
+    hide();
+    if(!el) return;
+    cur=el; timer=setTimeout(()=>show(el),550);
+  });
+  document.addEventListener("mousedown",hide);
+  document.addEventListener("keydown",hide);
+  document.addEventListener("scroll",hide,true);
+})();
 const markBtn=document.getElementById("mark"), contactCard=document.getElementById("contact");
 markBtn.addEventListener("click",e=>{
   e.stopPropagation();
@@ -1368,7 +1963,7 @@ document.getElementById("mailLink").addEventListener("click",async e=>{
 document.querySelectorAll(".rail button").forEach(b=>b.addEventListener("click",()=>openPanel(b.dataset.p)));
 document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>openPanel(S.open)));
 
-document.getElementById("res").addEventListener("change",e=>{S.res=e.target.value;update(false);});
+document.getElementById("res").addEventListener("change",e=>{S.res=e.target.value;fillResinInputs();update(false);});
 function updateReco(){
   const d=dominantPly(), r=recFor(d.fib,d.type);
   const MIN=0.15, MAX=0.80, pos=v=>Math.max(0,Math.min(100,(v-MIN)/(MAX-MIN)*100));
@@ -1421,13 +2016,28 @@ document.getElementById("useRec").addEventListener("click",()=>{
   document.getElementById("frac").value=typ;
   fracLabel(); update(false);
 });
-["mE1","mE2","mG12","mG23","mN12","mN23","mRho","mA1","mXt","mXc","mYt","mYc","mS"].forEach(id=>
+const R_FIELDS=[["rE","E",1000],["rNu","nu",1],["rRho","rho",1],["rA","a",1],["rSt","st",1],["rSc","sc",1]];
+function fillResinInputs(){
+  const m=RESINS[S.res];
+  R_FIELDS.forEach(([id,key,sc])=>{ document.getElementById(id).value=+(m[key]*sc).toFixed(key==="nu"?3:1); });
+  document.getElementById("rDeriv").innerHTML=
+    "Derived: G<sub>m</sub> = E<sub>m</sub>/2(1+ν<sub>m</sub>) = <b>"+(m.E/(2*(1+m.nu))*1000).toFixed(0)+
+    " MPa</b> · τ<sub>m</sub> = σ<sub>m</sub>/√3 = <b>"+(m.st/Math.sqrt(3)).toFixed(0)+" MPa</b>";
+}
+R_FIELDS.forEach(([id,key,sc])=>{
   document.getElementById(id).addEventListener("input",()=>{
-    const g=x=>parseFloat(document.getElementById(x).value)||0;
-    S.man={E1:g("mE1"),E2:g("mE2"),G12:g("mG12"),G23:g("mG23"),nu12:g("mN12"),nu23:g("mN23"),
-           rho:g("mRho"),a1:g("mA1"),Xt:g("mXt"),Xc:g("mXc"),Yt:g("mYt"),Yc:g("mYc"),S12:g("mS")};
-    update(false);
-  }));
+    /* editing a catalogue resin forks it into the custom slot */
+    const src=RESINS[S.res];
+    if(S.res!=="custom"){
+      RESINS.custom=Object.assign({},src,{name:"Custom resin"});
+      S.res="custom";
+      document.getElementById("res").value="custom";
+    }
+    RESINS.custom[key]=(parseFloat(document.getElementById(id).value)||0)/sc;
+    fillResinInputs(); update(false);
+  });
+});
+fillResinInputs();
 
 const layersEl=document.getElementById("layers");
 layersEl.addEventListener("click",e=>{
@@ -1443,7 +2053,14 @@ layersEl.addEventListener("click",e=>{
   }
 });
 layersEl.addEventListener("input",e=>{
-  const el=e.target,i=+el.dataset.i,k=el.dataset.k;
+  const el=e.target,i=+el.dataset.i;
+  if(el.dataset.man!==undefined && !isNaN(i)){
+    const pl=S.plies[i];
+    pl.man=Object.assign({},MAN_DEFAULT,pl.man||{});
+    pl.man[el.dataset.man]=parseFloat(el.value)||0;
+    update(false); return;
+  }
+  const k=el.dataset.k;
   if(isNaN(i)||!k||el.tagName!=="INPUT") return;
   if(k==="a"){
     S.plies[i].a=Math.max(-90,Math.min(90,Math.round(+el.value||0)));
@@ -1455,7 +2072,7 @@ layersEl.addEventListener("input",e=>{
   else if(k==="gsm"){
     S.plies[i].gsm=Math.max(10,+el.value||300);
     const d=el.closest(".layer").querySelector(".derived");
-    if(d) d.textContent=plyThickness(S.plies[i].fib,S.plies[i].gsm).toFixed(3)+" mm";
+    if(d) d.textContent=plyThickness(S.plies[i].fib,S.plies[i].gsm,S.plies[i].man).toFixed(3)+" mm";
   }
   update();
 });
@@ -1463,7 +2080,10 @@ layersEl.addEventListener("change",e=>{
   const el=e.target,i=+el.dataset.i,k=el.dataset.k;
   if(isNaN(i)||el.tagName!=="SELECT") return;
   if(k==="type") S.plies[i].type=el.value;
-  if(k==="fib")  S.plies[i].fib=el.value;
+  if(k==="fib"){
+    S.plies[i].fib=el.value;
+    if(el.value==="custom" && !S.plies[i].man) S.plies[i].man=Object.assign({},MAN_DEFAULT);
+  }
   renderLayers(); update();
 });
 function addLayer(){
@@ -1490,10 +2110,24 @@ document.querySelectorAll(".circ").forEach(b=>b.addEventListener("click",()=>{
   if(v==="top"){cam.theta=-Math.PI/2;cam.phi=0.16;cam.r=1.9;}
   if(v==="edge"){cam.theta=-Math.PI/2;cam.phi=1.53;cam.r=1.8;}
 }));
-document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
+const modelsWin=document.getElementById("p-models"), modelsBtn=document.getElementById("openModels");
+function toggleModels(force){
+  const open = force!==undefined ? force : modelsWin.hidden;
+  modelsWin.hidden=!open; modelsBtn.setAttribute("aria-expanded",String(open));
+  if(open) renderModels();
+}
+modelsBtn.addEventListener("click",()=>toggleModels());
+document.getElementById("closeModels").addEventListener("click",()=>toggleModels(false));
+document.getElementById("modelsBody").addEventListener("click",e=>{
+  const b=e.target.closest(".mopt"); if(!b||b.disabled) return;
+  S.models[b.dataset.blk]=b.dataset.k;
+  update(false);
+});
+document.querySelectorAll(".tab[data-t]").forEach(b=>b.addEventListener("click",()=>{
   S.tab=b.dataset.t;
-  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",String(x===b)));
-  ["ply","shell","solid","strength"].forEach(k=>document.getElementById("t-"+k).hidden=k!==S.tab);
+  document.querySelectorAll(".tab[data-t]").forEach(x=>x.setAttribute("aria-selected",String(x===b)));
+  ["ply","shell","solid","strength","curves"].forEach(k=>document.getElementById("t-"+k).hidden=k!==S.tab);
+  renderCurves();
 }));
 seg("segThick","thickMode",()=>{ renderLayers(); update(); });
 seg("segKind","kind",()=>renderExport(analyse()));
