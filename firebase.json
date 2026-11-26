@@ -1,0 +1,21 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json",
+    "location": "eur3"
+  },
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Laminae",
+        "supportEmail": "bellomatisp@gmail.com",
+        "authorizedRedirectUris": [
+          "https://laminae-3b3c4.firebaseapp.com/__/auth/handler",
+          "https://bellomatisp.github.io",
+          "http://localhost"
+        ]
+      }
+    }
+  }
+}

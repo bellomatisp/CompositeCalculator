@@ -1,9 +1,15 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Each user reads/writes only his own library
+    // One library doc per user: libraries/{uid} = {fibers, resins, plies, updated}
     match /libraries/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['fibers', 'resins', 'plies', 'updated'])
+        && request.resource.data.fibers is map
+        && request.resource.data.resins is map
+        && request.resource.data.plies is map
+        && request.resource.data.updated is string;
     }
     match /{document=**} {
       allow read, write: if false;
