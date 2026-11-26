@@ -724,7 +724,8 @@ const TIPS={
   "fmt":"Text format of the material card for your solver.",
   "units":"Unit system of the exported values. Match it to the one your model is built in.",
   "fpf":"First ply failure: load at which the weakest ply first cracks. The usable limit — the part is damaged, not broken.",
-  "lpf":"Last ply failure: load at which the last ply fails. Upper bound on the ultimate strength.",
+  "lpf":"Ultimate: highest load reached during the progressive failure, after successive ply cracks and fiber breaks.",
+  "spf":"Second ply failure: next ply group to fail once the first one is degraded.",
   "Σx+":"Average tensile stress along x the laminate can carry.",
   "Σx−":"Average compressive stress along x the laminate can carry.",
   "Σy+":"Average tensile stress along y the laminate can carry.",
@@ -1003,6 +1004,72 @@ function strengths(A,h,layers){
     return {name,fpf,ff,fpPly,ffPly};
   });
 }
+/* ---- progressive ply failure ---------------------------------------
+   Load-controlled, membrane only.  At each step the ply (or group of
+   identical plies) reaching the criterion first is degraded, A is rebuilt
+   and the load is raised again:
+     matrix mode -> E2, G12 ~ 0, nu12 = 0 (ply discount, fibers still carry)
+     fiber mode  -> whole ply ~ 0
+   Step 1 = first ply failure = elastic limit of the laminate.          */
+const DEG=1e-4;
+function plyModeRatios(sL,sT,tLT,m){
+  const X=sL>=0?m.Xt:m.Xc, Y=sT>=0?m.Yt:m.Yc;
+  return {rL:Math.abs(sL)/X, rT:Math.abs(sT)/Y, rS:Math.abs(tLT)/m.S12};
+}
+function degradedMat(m,st){
+  if(st==="fib") return {...m,E1:m.E1*DEG,E2:m.E2*DEG,G12:m.G12*DEG,nu12:0};
+  if(st==="mat") return {...m,E2:m.E2*DEG,G12:m.G12*DEG,nu12:0};
+  return m;
+}
+function progressiveCase(layers,h,SIG,ci){
+  const st=layers.map(()=>"ok"), steps=[];
+  let A0=null;
+  for(let it=0; it<2*layers.length+2; it++){
+    if(st.every(s=>s==="fib")) break;
+    const A=[[0,0,0],[0,0,0],[0,0,0]], QB=[];
+    layers.forEach((l,k)=>{
+      const qb=qbar(Qmat(degradedMat(l.m,st[k])),l.a); QB.push(qb);
+      for(let i=0;i<3;i++) for(let j=0;j<3;j++) A[i][j]+=qb[i][j]*l.t;
+    });
+    if(!A0) A0=A;
+    if(A[ci][ci] < A0[ci][ci]*1e-3) break;               // nothing left in that direction
+    const ah=inv3(A).map(r=>r.map(v=>v*h)), e=[0,0,0];
+    for(let i=0;i<3;i++) for(let j=0;j<3;j++) e[i]+=ah[i][j]*SIG[j];
+    const cand=[];
+    layers.forEach((l,k)=>{
+      if(st[k]==="fib") return;
+      const sg=[0,0,0];
+      for(let i=0;i<3;i++) for(let j=0;j<3;j++) sg[i]+=QB[k][i][j]*e[j];
+      const t=l.a*Math.PI/180, c=Math.cos(t), si=Math.sin(t);
+      const sL =  c*c*sg[0] + si*si*sg[1] + 2*c*si*sg[2];
+      const sT = si*si*sg[0] +  c*c*sg[1] - 2*c*si*sg[2];
+      const tLT= -c*si*sg[0] + c*si*sg[1] + (c*c-si*si)*sg[2];
+      let v, mode;
+      if(st[k]==="mat"){ const X=sL>=0?l.m.Xt:l.m.Xc; v=Math.abs(sL)>1e-12?X/Math.abs(sL):Infinity; mode="fiber"; }
+      else{
+        v=plyLoadFactor(sL,sT,tLT,l.m);
+        const q=plyModeRatios(sL,sT,tLT,l.m);
+        mode = q.rL>=Math.max(q.rT,q.rS) ? "fiber" : (q.rS>=q.rT ? "shear" : "matrix");
+      }
+      if(isFinite(v)&&v>0) cand.push({k,v,mode});
+    });
+    if(!cand.length) break;
+    const vmin=Math.min(...cand.map(c=>c.v));
+    const hit=cand.filter(c=>c.v<=vmin*(1+1e-6));
+    const strain=e[ci]*vmin*1e-3;                          // e in 1/GPa, load in MPa
+    steps.push({load:vmin, strain, plies:hit.map(c=>c.k), modes:[...new Set(hit.map(c=>c.mode))],
+                Esec: Math.abs(e[ci])>1e-15 ? 1/e[ci] : Infinity});
+    hit.forEach(c=>{ st[c.k] = (c.mode==="fiber"||st[c.k]==="mat") ? "fib" : "mat"; });
+  }
+  let ult=-Infinity, ultStep=-1;
+  steps.forEach((s,i)=>{ if(s.load>ult){ult=s.load;ultStep=i;} });
+  return {steps, ult, ultStep};
+}
+function progressive(layers,h){
+  const cases=[["Σx+",[1,0,0],0],["Σx−",[-1,0,0],0],
+               ["Σy+",[0,1,0],1],["Σy−",[0,-1,0],1],["Σxy",[0,0,1],2]];
+  return cases.map(([name,SIG,ci])=>({name,...progressiveCase(layers,h,SIG,ci)}));
+}
 function analyse(){
   const cache={}, mats=[];
   const getMat=(l,idx)=>{
@@ -1058,7 +1125,7 @@ function analyse(){
   const maxB=Math.max(...B.flat().map(Math.abs));
   const refB=Math.max(...A.flat().map(Math.abs))*h;
   return {mats,layers,h,A,B,D,As,membrane,flexion,solid,rho,alpha,az,
-    str:strengths(A,h,layers),
+    str:strengths(A,h,layers), prog:progressive(layers,h),
     coupBD:maxB/(refB||1)>1e-6,
     coupA:(Math.abs(A[0][2])+Math.abs(A[1][2]))/(Math.abs(A[0][0])||1)>1e-6,
     posdef:checkPos(solid)};
@@ -1336,17 +1403,46 @@ function renderShell(r){
     '<div class="mini" style="margin-top:8px">D</div>'+matHTML(r.D,1e3,2)+'</details>';
 }
 function renderStrength(r){
-  const rows=r.str.map(c=>{
-    const fp=r.layers[c.fpPly], lp=r.layers[c.ffPly];
-    return '<tr><td class="d"'+tipAttr(c.name)+'>'+c.name+'</td>'+
-      '<td class="v">'+f(c.fpf,0)+'</td><td class="u">MPa · ply '+(c.fpPly+1)+(fp?" @ "+fp.a+"°":"")+'</td>'+
-      '<td class="v">'+f(c.ff,0)+'</td><td class="u">MPa · ply '+(c.ffPly+1)+(lp?" @ "+lp.a+"°":"")+'</td></tr>';
+  const CRIT={maxstress:"max stress",tsaihill:"Tsai-Hill",tsaiwu:"Tsai-Wu"}[S.models.fail]||"Tsai-Hill";
+  const plyTxt=(s,mx)=>{
+    if(!s) return "—";
+    const p=s.plies.map(k=>k+1), a=[...new Set(s.plies.map(k=>r.layers[k].a))];
+    return (p.length>1?"plies ":"ply ")+(p.length>4?p.slice(0,4).join(",")+"…":p.join(","))+" @ "+a.map(x=>x+"°").join("/")+" · "+s.modes.join("+");
+  };
+  const pct=x=>isFinite(x)?(Math.abs(x)*100).toFixed(2)+" %":"—";
+  const rows=r.prog.map(c=>{
+    const s1=c.steps[0], s2=c.steps[1];
+    return '<tr><td class="d" rowspan="2"'+tipAttr(c.name)+'>'+c.name+'</td>'+
+      '<td class="v">'+(s1?f(s1.load,0):"—")+'</td>'+
+      '<td class="v">'+(s2?f(s2.load,0):"—")+'</td>'+
+      '<td class="v">'+(isFinite(c.ult)?f(c.ult,0):"—")+'</td></tr>'+
+      '<tr><td class="u" style="text-align:right">'+plyTxt(s1)+'</td>'+
+      '<td class="u" style="text-align:right">'+plyTxt(s2)+'</td>'+
+      '<td class="u" style="text-align:right">'+(c.ultStep>=0?"step "+(c.ultStep+1):"")+'</td></tr>';
   }).join("");
+  const elas=r.prog.map(c=>{
+    const s1=c.steps[0];
+    return [c.name, s1?f(s1.load,0)+" MPa":"—", s1?"ε "+pct(s1.strain):""];
+  });
+  const seq=r.prog.map(c=>
+    '<div class="mini" style="margin-top:10px;color:var(--ink-2)">'+c.name+'</div>'+
+    '<table class="res">'+c.steps.map((s,i)=>
+      '<tr><td class="d">'+(i+1)+(i===0?" · elastic limit":"")+(i===c.ultStep?" · ultimate":"")+'</td>'+
+      '<td class="v">'+f(s.load,0)+'</td><td class="u">MPa · ε '+pct(s.strain)+'</td></tr>'+
+      '<tr><td class="u" colspan="3" style="padding-top:0">'+plyTxt(s)+' · secant E '+f(Math.abs(s.Esec),1)+' GPa</td></tr>').join("")+
+    '</table>').join("");
   document.getElementById("t-strength").innerHTML=
-    '<div class="sect">laminate strengths · Tsai-Hill</div>'+
-    '<p class="mini">Unit membrane load → mid-plane strains through [A/h]⁻¹ → ply stresses rotated into the fiber axes, then (σ<sub>L</sub>/X)² + (σ<sub>T</sub>/Y)² + (τ<sub>LT</sub>/S)² = 1 solved ply by ply. X and Y take the tensile or compressive value according to the sign of the stress.</p>'+
-    '<table class="res"><tr><td class="u">load</td><td class="u" colspan="2" data-tipkey="fpf" data-tip-title="first ply failure">first ply failure</td><td class="u" colspan="2" data-tipkey="lpf" data-tip-title="last ply failure">last ply failure</td></tr>'+rows+'</table>'+
-    '<div class="note">First ply failure is the usable limit — the laminate is damaged but still carries load, much like the yield point of a metal. Last ply failure is the load at which the final ply group reaches the criterion, computed on the undamaged stiffness, so it is an upper bound.</div>'+
+    '<div class="sect">elastic limits · first ply failure</div>'+
+    '<p class="mini">The laminate is linear elastic up to the first ply failure. Beyond it, matrix cracks soften the stack and the response is no longer elastic.</p>'+
+    tbl(elas)+
+    '<div class="sect">ply-by-ply rupture · '+CRIT+'</div>'+
+    '<p class="mini">Laminate average stress (MPa) at which the 1st, then the 2nd ply group fails, and the ultimate load. After each failure the ply is degraded — matrix crack: E₂, G₁₂ → 0; fiber break: ply → 0 — A is rebuilt and the load raised again.</p>'+
+    '<table class="res"><tr><td class="u">load</td>'+
+      '<td class="u" style="text-align:right" data-tipkey="fpf" data-tip-title="first ply failure">1st ply</td>'+
+      '<td class="u" style="text-align:right" data-tipkey="spf" data-tip-title="second ply failure">2nd ply</td>'+
+      '<td class="u" style="text-align:right" data-tipkey="lpf" data-tip-title="ultimate">ultimate</td></tr>'+rows+'</table>'+
+    '<div class="note">Membrane loads only, load-controlled, plies with the same angle and material fail together. A 2nd failure lower than the 1st means the first crack immediately overloads the next ply. The degraded model is a standard estimate (ply discount): use it to rank laminates, test coupons for design values.</div>'+
+    '<details class="more"><summary>full failure sequence</summary>'+seq+'</details>'+
     '<details class="more"><summary>ply strengths used</summary>'+
     '<p class="mini" style="margin-top:8px">Barbero model for UD plies; woven and mat values are scaled estimates.</p>'+
     r.mats.map(M=>'<div class="mini" style="margin-top:9px;color:var(--ink-2)">'+M.name+'</div>'+
@@ -1731,11 +1827,13 @@ function expTxt(r){
     L.push("  areal weight = "+nb(r.rho*r.h/1000)+" kg/m^2");
     L.push("  B "+(r.coupBD?"/= 0 - membrane-bending coupling":"= 0 - symmetric stack"));
     L.push("");
-    L.push("-- LAMINATE STRENGTHS, TSAI-HILL (MPa) --");
-    L.push("  load     first ply failure     last ply failure");
-    r.str.forEach(c=>L.push("  "+c.name.padEnd(8)+
-      (nb(c.fpf,4)+" (ply "+(c.fpPly+1)+")").padEnd(22)+
-       nb(c.ff,4)+" (ply "+(c.ffPly+1)+")"));
+    L.push("-- LAMINATE STRENGTHS, PROGRESSIVE PLY FAILURE (MPa) --");
+    L.push("  load     1st ply = elastic limit       2nd ply                ultimate");
+    r.prog.forEach(c=>{const s1=c.steps[0],s2=c.steps[1],pl=s=>s?(" (ply "+s.plies.map(k=>k+1).join(",")+")"):"";
+      L.push("  "+c.name.padEnd(8)+
+        ((s1?nb(s1.load,4):"-")+pl(s1)+(s1?"  e="+(Math.abs(s1.strain)*100).toFixed(3)+"%":"")).padEnd(31)+
+        ((s2?nb(s2.load,4):"-")+pl(s2)).padEnd(23)+
+        (isFinite(c.ult)?nb(c.ult,4):"-"));});
   }else{
     const s=r.solid;
     L.push("-- HOMOGENISED 3D ORTHOTROPIC MATERIAL --");
