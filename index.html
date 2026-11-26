@@ -209,7 +209,7 @@ input[type=range]{flex:1;accent-color:var(--ink);background:transparent}
 .edge{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin:5px 0}
 
 /* ---------- results ---------- */
-.tabs{display:flex;gap:6px;margin-bottom:16px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
 .tab{border:none;background:var(--soft);color:var(--ink-2);padding:6px 13px;cursor:pointer;font-size:12px;font-family:var(--mono);border-radius:99px}
 .tab[aria-selected=true]{background:var(--ink);color:#fff}
 table.res{width:100%;border-collapse:collapse;font-size:12.5px}
@@ -438,10 +438,6 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
     <svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V4M16 19v-7M4 19h17"/></svg>
     <span class="tip">properties</span>
   </button>
-  <button id="r-export" aria-expanded="false" data-p="export">
-    <svg viewBox="0 0 24 24"><path d="M12 3v11"/><path d="m8 10 4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
-    <span class="tip">export</span>
-  </button>
 </nav>
 
 <div class="chips" id="chips"></div>
@@ -528,6 +524,7 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
       <button class="tab" role="tab" aria-selected="false" data-t="solid" data-tipkey="tab-solid">solid</button>
       <button class="tab" role="tab" aria-selected="false" data-t="strength" data-tipkey="tab-strength">strength</button>
       <button class="tab" role="tab" aria-selected="false" data-t="curves" data-tipkey="tab-curves">curves</button>
+      <button class="tab" role="tab" aria-selected="false" data-t="export" data-tipkey="tab-export">export</button>
       <button class="tab modelsbtn" id="openModels" aria-expanded="false" data-tipkey="models" data-tip-title="models">models</button>
     </div>
     <div id="t-ply"></div>
@@ -535,17 +532,7 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
     <div id="t-solid" hidden></div>
     <div id="t-strength" hidden></div>
     <div id="t-curves" hidden></div>
-  </div>
-</section>
-
-<section class="panel modelswin" id="p-models" hidden>
-  <div class="p-head"><h2>models &amp; formulas</h2><button class="close" id="closeModels">✕</button></div>
-  <div class="p-body" id="modelsBody"></div>
-</section>
-
-<section class="panel wide" id="p-export" hidden>
-  <div class="p-head"><h2>solver export</h2><button class="close" data-close>✕</button></div>
-  <div class="p-body">
+    <div id="t-export" hidden>
     <div class="expgrid">
       <div><span class="lb" data-tipkey="kind" data-tip-title="element type">element type</span>
         <div class="seg" id="segKind"><button data-v="shell" aria-pressed="true">shell</button><button data-v="solid" aria-pressed="false">solid</button></div>
@@ -560,8 +547,15 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
     <p class="mini" id="expHint"></p>
     <div class="btnrow" style="margin-bottom:11px"><button class="btn primary" id="copyBtn">copy to clipboard</button><span class="copied" id="copied"></span></div>
     <pre class="out" id="out"></pre>
+    </div>
   </div>
 </section>
+
+<section class="panel modelswin" id="p-models" hidden>
+  <div class="p-head"><h2>models &amp; formulas</h2><button class="close" id="closeModels">✕</button></div>
+  <div class="p-body" id="modelsBody"></div>
+</section>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -737,6 +731,7 @@ const TIPS={
   "Σy−":"Average compressive stress along y the laminate can carry.",
   "Σxy":"Average in-plane shear stress the laminate can carry.",
   "tab-ply":"Properties of a single ply in its own fiber axes.",
+  "tab-export":"Material cards for your solver: Ansys APDL, Abaqus, CSV or a plain data sheet.",
   "tab-shell":"Equivalent properties of the whole laminate as a thin plate: membrane, bending and the A B D matrices.",
   "tab-solid":"One 3D material averaging the full thickness, for solid elements.",
   "tab-strength":"Stress the laminate carries before plies start to fail.",
@@ -1975,7 +1970,7 @@ function update(rebuild=true){
 }
 function openPanel(name){
   S.open=(S.open===name)?null:name;
-  ["matrix","layers","props","export"].forEach(k=>{
+  ["matrix","layers","props"].forEach(k=>{
     document.getElementById("p-"+k).hidden=S.open!==k;
     document.getElementById("r-"+k).setAttribute("aria-expanded",String(S.open===k));
   });
@@ -2228,7 +2223,8 @@ document.getElementById("modelsBody").addEventListener("click",e=>{
 document.querySelectorAll(".tab[data-t]").forEach(b=>b.addEventListener("click",()=>{
   S.tab=b.dataset.t;
   document.querySelectorAll(".tab[data-t]").forEach(x=>x.setAttribute("aria-selected",String(x===b)));
-  ["ply","shell","solid","strength","curves"].forEach(k=>document.getElementById("t-"+k).hidden=k!==S.tab);
+  ["ply","shell","solid","strength","curves","export"].forEach(k=>document.getElementById("t-"+k).hidden=k!==S.tab);
+  document.getElementById("p-props").classList.toggle("wide",S.tab==="export");
   renderCurves();
 }));
 seg("segThick","thickMode",()=>{ renderLayers(); update(); });
