@@ -34,9 +34,17 @@ h2{margin:0;font-size:12px;font-weight:500;font-family:var(--mono);letter-spacin
 
 /* ---------- top chrome ---------- */
 .credit{
-  position:fixed;left:70px;top:32px;z-index:20;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);
-  letter-spacing:.02em;white-space:nowrap;
+  position:fixed;left:70px;top:28px;z-index:20;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);
+  letter-spacing:.02em;white-space:nowrap;background:none;border:none;padding:3px 6px;border-radius:8px;cursor:pointer;
 }
+.credit:hover,.credit[aria-expanded=true]{color:var(--ink);background:var(--soft)}
+.mark.signed{box-shadow:0 0 0 2px var(--paper),0 0 0 3.5px var(--ok)}
+.card.contactcard{left:70px;top:58px}
+.card.acctcard{width:340px;max-height:calc(100vh - 92px);overflow-y:auto;padding:12px 14px}
+.modal-bg{position:fixed;inset:0;background:rgba(17,18,19,.18);z-index:40}
+.modal-bg[hidden]{display:none}
+.fibmodal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,calc(100vw - 32px));
+  max-height:calc(100vh - 40px);bottom:auto;z-index:41}
 .mark{
   position:fixed;left:18px;top:20px;z-index:21;width:40px;height:40px;border-radius:50%;
   padding:0;border:1px solid var(--line);background:#000;cursor:pointer;overflow:hidden;display:block;
@@ -130,12 +138,6 @@ h2{margin:0;font-size:12px;font-weight:500;font-family:var(--mono);letter-spacin
 .panel[hidden]{display:none}
 .panel.wide{width:486px}
 .p-head{height:50px;flex:none;display:flex;align-items:center;padding:0 18px;border-bottom:1px solid var(--line)}
-.p-head .help{
-  width:18px;height:18px;border-radius:50%;border:1px solid var(--line);flex:none;
-  display:grid;place-items:center;margin-right:9px;text-decoration:none;
-  font-family:var(--mono);font-size:11px;color:var(--ink-3);line-height:1;
-}
-.p-head .help:hover{border-color:var(--ink);color:var(--ink)}
 .p-head .close{margin-left:auto;background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:15px;padding:4px}
 .p-head .close:hover{color:var(--ink)}
 .p-body{flex:1;min-height:0;overflow-y:auto;padding:18px}
@@ -295,6 +297,41 @@ td.d[data-tip]{text-decoration:underline dotted #C9CDD0;text-underline-offset:3p
 .msrc a:hover{color:var(--ink);text-decoration:underline}
 @media (max-width:900px){ .modelswin{left:86px;right:auto;width:calc(100vw - 108px)} .mrow{grid-template-columns:1fr} }
 
+/* ---------- library & account ---------- */
+.acct{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:6px}
+.acct .who{display:flex;align-items:center;gap:10px;font-size:12.5px}
+.acct .who img,.acct .who .av{width:30px;height:30px;border-radius:50%;background:var(--soft-2);flex:none;object-fit:cover;
+  display:grid;place-items:center;font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.acct .who b{display:block;font-weight:500}
+.acct .who small{color:var(--ink-3);font-family:var(--mono);font-size:10.5px}
+.acct input[type=email],.acct input[type=password]{margin-bottom:7px}
+.gbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:8px;border:1px solid var(--line);
+  border-radius:10px;background:#fff;cursor:pointer;font-size:12.5px;margin-bottom:10px}
+.gbtn:hover{border-color:var(--ink-3)}
+.gbtn svg{width:16px;height:16px}
+.or{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin:0 0 10px}
+.or:before,.or:after{content:"";flex:1;height:1px;background:var(--line)}
+.linkbtn{border:none;background:none;padding:0;color:var(--ink-2);text-decoration:underline;cursor:pointer;font-size:11.5px}
+.amsg{font-size:11.5px;margin:8px 0 0;min-height:14px;color:var(--ink-3)}
+.amsg.err{color:var(--bad)} .amsg.ok{color:var(--ok)}
+.sync{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:8px}
+.liblist .item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;font-size:12.5px}
+.liblist .item:hover{background:var(--soft)}
+.liblist .item .dot{width:10px;height:10px;border-radius:50%;flex:none;border:1px solid var(--line)}
+.liblist .item .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.liblist .item .meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);white-space:nowrap}
+.liblist .item button{border:none;background:none;cursor:pointer;color:var(--ink-3);font-size:11.5px;padding:2px 4px;border-radius:5px}
+.liblist .item button:hover{color:var(--ink)}
+.liblist .item button.del.arm{color:#fff;background:var(--bad)}
+.liblist .empty{font-size:12px;color:var(--ink-3);padding:2px 0 4px}
+.libform{margin:6px 0 4px}
+.libform summary{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);cursor:pointer;list-style:none;padding:4px 0}
+.libform[open] summary{margin-bottom:10px}
+.libform input[type=color]{width:100%;height:36px;padding:3px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.saverow{display:flex;gap:6px;margin-top:10px}
+.saverow input{flex:1;min-width:0;padding:6px 9px;font-size:12px;border-radius:9px}
+.saverow .btn{white-space:nowrap;padding:6px 10px}
+
 /* ---------- export ---------- */
 .seg{display:inline-flex;background:var(--soft);border-radius:99px;padding:3px;gap:2px;flex-wrap:wrap}
 .seg button{border:none;background:transparent;padding:6px 12px;cursor:pointer;font-size:11.5px;font-family:var(--mono);color:var(--ink-2);border-radius:99px}
@@ -320,9 +357,9 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
 <canvas id="gl"></canvas>
 <div id="hint" role="tooltip"></div>
 
-<button class="mark" id="mark" aria-expanded="false" title="Matis Bello"><img src="data:image/jpeg;base64,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" alt="Matis Bello"></button>
-<span class="credit">made by Matis BELLO</span>
-<div class="card" id="contact" hidden>
+<button class="mark" id="mark" aria-expanded="false" title="account"><img src="data:image/jpeg;base64,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" alt="Matis Bello"></button>
+<button class="credit" id="credit" aria-expanded="false">made by Matis BELLO</button>
+<div class="card contactcard" id="contact" hidden>
   <div class="who">Matis Bello</div>
   <a href="mailto:bellomatisp@gmail.com" target="_top" id="mailLink">
     <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>
@@ -334,6 +371,45 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
     LinkedIn
   </a>
 </div>
+
+<div class="card acctcard" id="acctCard" hidden>
+  <div id="acct"></div>
+  <div class="sect">my fibers</div>
+  <div id="libFibers" class="liblist"></div>
+  <button class="chipbtn" id="addFiberBtn">＋ add a fiber</button>
+  <div class="sect">my resins</div>
+  <div id="libResins" class="liblist"></div>
+  <p class="mini">Save a matrix from the resin panel — catalogue or edited values.</p>
+  <div class="sect">my plies</div>
+  <div id="libPlies" class="liblist"></div>
+  <p class="mini">Set a layer to “Custom constants”, then “save to library” inside its constants.</p>
+  <div class="sect">backup</div>
+  <div class="btnrow"><button class="btn" id="libExport">download .json</button><label class="btn" style="cursor:pointer">import .json<input type="file" id="libImport" accept=".json,application/json" hidden></label></div>
+</div>
+
+<div class="modal-bg" id="fibModalBg" hidden></div>
+<section class="panel fibmodal" id="fibModal" hidden>
+  <div class="p-head"><h2 id="fibFormTitle">add a fiber</h2><button class="close" id="ffClose">✕</button></div>
+  <div class="p-body">
+    <input type="hidden" id="ffId">
+    <label class="f"><span>name</span><input type="text" id="ffName" placeholder="e.g. Toray T700S"></label>
+    <div class="row2">
+      <label class="f"><span>form</span><select id="ffForm"><option value="">continuous (UD / woven)</option><option value="mat">chopped mat</option></select></label>
+      <label class="f"><span>colour</span><input type="color" id="ffCol" value="#16181c"></label>
+      <label class="f"><span>E<sub>f1</sub> axial (GPa)</span><input type="number" id="ffEL" step="1"></label>
+      <label class="f"><span>E<sub>f2</sub> transverse (GPa)</span><input type="number" id="ffET" step="0.1"></label>
+      <label class="f"><span>G<sub>f12</sub> (GPa)</span><input type="number" id="ffG" step="0.1"></label>
+      <label class="f"><span>G<sub>f23</sub> (GPa)</span><input type="number" id="ffG23" step="0.1"></label>
+      <label class="f"><span>ν<sub>f12</sub></span><input type="number" id="ffNu" step="0.01"></label>
+      <label class="f"><span>ρ<sub>f</sub> (kg/m³)</span><input type="number" id="ffRho" step="10"></label>
+      <label class="f"><span>σ<sub>f</sub> tension (MPa)</span><input type="number" id="ffSt" step="10"></label>
+      <label class="f"><span>σ<sub>f</sub> compression (MPa)</span><input type="number" id="ffSc" step="10"></label>
+      <label class="f"><span>α<sub>f1</sub> (10⁻⁶/K)</span><input type="number" id="ffA1" step="0.1"></label>
+      <label class="f"><span>α<sub>f2</sub> (10⁻⁶/K)</span><input type="number" id="ffA2" step="0.1"></label>
+    </div>
+    <div class="btnrow"><button class="btn primary" id="ffSave">save fiber</button><button class="btn" id="ffCancel">cancel</button></div>
+  </div>
+</section>
 
 <div class="ruler">
   <div class="track">
@@ -412,6 +488,7 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
       <label class="f"><span data-tipkey="scm" data-tip-title="σm compression">σ<sub>m</sub> compression (MPa)</span><input type="number" id="rSc" step="1"></label>
     </div>
     <p class="reco-note" id="rDeriv"></p>
+    <div class="saverow"><input type="text" id="resSaveName" placeholder="name, e.g. Sicomin SR 8100"><button class="btn" id="resSave">save to library</button></div>
   </div>
 </section>
 
@@ -443,7 +520,7 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
 </section>
 
 <section class="panel" id="p-props" hidden>
-  <div class="p-head"><a class="help" href="https://docs.google.com/document/d/1A-b0zgTpBfbzJLn_oqJ9uBV1P4TOEZHLGL0iOeH4EMs/edit?usp=sharing" target="_blank" rel="noopener noreferrer" title="How these values are calculated">?</a><h2>properties</h2><button class="close" data-close>✕</button></div>
+  <div class="p-head"><h2>properties</h2><button class="close" data-close>✕</button></div>
   <div class="p-body">
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" aria-selected="true" data-t="ply" data-tipkey="tab-ply">ply</button>
@@ -489,6 +566,18 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 "use strict";
+/* ===================================================================
+   ACCOUNTS — paste the config of your Firebase web app here.
+   Left empty, the library still works and is kept in this browser.
+   =================================================================== */
+const FIREBASE_CONFIG = {
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  appId: ""
+};
+const LIB = {fibers:{}, resins:{}, plies:{}};
+const esc = v => String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 /* ===================================================================
    FIBER AND MATRIX DATA
@@ -667,7 +756,7 @@ const TIPS={
   "customply":"Use measured or datasheet ply values instead of the estimate from fiber and resin. Each custom layer keeps its own set.",
   "userec":"Fiber content reached in practice for this reinforcement and process. Above it the resin can no longer wet every fiber.",
   "preset":"Common stacking sequences to start from.",
-  "models":"Every formula behind the numbers, with up to three models per calculation to choose from and their sources."
+    "models":"Every formula behind the numbers, with up to three models per calculation to choose from and their sources."
 };
 /* properties that can be plotted against the loading direction */
 const CURVE_DEFS=[
@@ -683,7 +772,7 @@ const CURVE_GROUPS={
   str:{title:"strength · first ply failure",    unit:"MPa", dec:0},
   nu: {title:"Poisson ratio",                   unit:"",    dec:3}
 };
-const FIBER_KEYS = Object.keys(FIBERS).concat(["custom"]);
+const fiberKeys = () => Object.keys(FIBERS).concat(["custom"]);
 const fiberName = k => k==="custom" ? "Custom constants" : FIBERS[k].name;
 
 /* ===================================================================
@@ -843,7 +932,7 @@ function matSheet(ud){
 }
 const typeTag=t=>t==="fabric"?"WOVEN":t==="mat"?"MAT":"UD";
 const typeLabel=t=>t==="fabric"?"woven":t==="mat"?"random mat sheet":"unidirectional";
-const isGlass=k=>k.indexOf("glass")===0;
+const isGlass=k=>k.indexOf("glass")===0 || !!(FIBERS[k]&&FIBERS[k].form==="mat");
 const matName=(fib,type)=>
   (fib==="custom"?"CUSTOM":FIBERS[fib].name.toUpperCase().replace(/[^A-Z0-9]+/g,"_").replace(/^_|_$/g,""))
   +"_"+typeTag(type);
@@ -926,7 +1015,9 @@ function analyse(){
     if(!cache[key]){
       const ud = l.fib==="custom" ? customLamina(l.man) : udLamina(l.fib);
       const p  = l.type==="fabric" ? fabricLamina(ud) : l.type==="mat" ? matSheet(ud) : ud;
-      const nm=matName(l.fib,l.type)+(l.fib==="custom"?"_"+(idx+1):"");
+      const nm=(l.fib==="custom"&&l.libPly&&l.libName)
+        ? l.libName.toUpperCase().replace(/[^A-Z0-9]+/g,"_").replace(/^_|_$/g,"")+"_"+(l.type==="fabric"?"WOVEN":"UD")
+        : matName(l.fib,l.type)+(l.fib==="custom"?"_"+(idx+1):"");
       cache[key]={id:mats.length+1,key,name:nm,fib:l.fib,type:l.type,p};
       mats.push(cache[key]);
     }
@@ -1826,7 +1917,8 @@ function manEditor(p,i){
     MAN_FIELDS.map(([k,lab,u])=>'<label><span>'+lab+'</span>'+
       '<input type="number" step="'+(k.indexOf("nu")===0?"0.01":"0.1")+'" value="'+m[k]+'" data-i="'+i+'" data-man="'+k+'"'+
       tipAttr({E1:"E₁",E2:"E₂",G12:"G₁₂",G23:"G₂₃",nu12:"ν₁₂",nu23:"ν₂₃",rho:"ρ",a1:"α₁",Xt:"Xt",Xc:"Xc",Yt:"Yt",Yc:"Yc",S12:"S₁₂"}[k])+'></label>').join("")+
-    '</div></details>';
+    '</div><div class="saverow"><input type="text" class="plyname" data-i="'+i+'" placeholder="name" value="'+esc(p.libName||"")+'">'+
+    '<button class="btn" data-saveply="'+i+'">save to library</button></div></details>';
 }
 function typeOptions(p){
   const opts = isGlass(p.fib) ? [["mat","mat sheet"]] : [["ud","UD"],["fabric","woven"]];
@@ -1847,7 +1939,7 @@ function renderLayers(){
         '<button class="del" data-del="'+i+'" title="delete layer">✕</button>'+
       '</div>'+
       '<div class="lfib"><select data-i="'+i+'" data-k="fib" data-tipkey="pfiber" data-tip-title="reinforcement">'+
-        FIBER_KEYS.map(k=>'<option value="'+k+'"'+(p.fib===k?" selected":"")+'>'+fiberName(k)+'</option>').join("")+
+        fiberOptions(p)+
       '</select>'+
         (S.thickMode==="gsm"?'<span class="derived">'+p.t.toFixed(3)+' mm</span>':'')+
       '</div>'+
@@ -1900,7 +1992,7 @@ function seg(id,key,after){
 }
 
 /* ---------- wiring ---------- */
-document.getElementById("res").innerHTML=Object.entries(RESINS).map(([k,v])=>'<option value="'+k+'">'+v.name+'</option>').join("");
+fillResinSelect();
 document.getElementById("res").value=S.res;
 renderLayers(); initGL(); update(); openPanel("layers");
 document.getElementById("frac").value=S.vf; fracLabel();
@@ -1933,19 +2025,21 @@ document.getElementById("frac").value=S.vf; fracLabel();
   document.addEventListener("keydown",hide);
   document.addEventListener("scroll",hide,true);
 })();
-const markBtn=document.getElementById("mark"), contactCard=document.getElementById("contact");
-markBtn.addEventListener("click",e=>{
+const markBtn=document.getElementById("mark"), acctCard=document.getElementById("acctCard");
+const creditBtn=document.getElementById("credit"), contactCard=document.getElementById("contact");
+const POPS=[[markBtn,acctCard],[creditBtn,contactCard]];
+function setPop(btn,card,open){ card.hidden=!open; btn.setAttribute("aria-expanded",String(open)); }
+POPS.forEach(([btn,card])=>btn.addEventListener("click",e=>{
   e.stopPropagation();
-  const open=contactCard.hidden;
-  contactCard.hidden=!open;
-  markBtn.setAttribute("aria-expanded",String(open));
-});
+  const open=card.hidden;
+  POPS.forEach(([b,c])=>setPop(b,c,false));
+  setPop(btn,card,open);
+}));
 document.addEventListener("click",e=>{
-  if(!contactCard.hidden && !contactCard.contains(e.target)){
-    contactCard.hidden=true; markBtn.setAttribute("aria-expanded","false");
-  }
+  if(!document.getElementById("fibModal").hidden) return;
+  POPS.forEach(([btn,card])=>{ if(!card.hidden && !card.contains(e.target)) setPop(btn,card,false); });
 });
-document.addEventListener("keydown",e=>{ if(e.key==="Escape") contactCard.hidden=true; });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") POPS.forEach(([b,c])=>setPop(b,c,false)); });
 /* hand the address to the OS mail client without navigating the page, and
    copy it too so the click is never a dead end */
 document.getElementById("mailLink").addEventListener("click",async e=>{
@@ -2058,6 +2152,7 @@ layersEl.addEventListener("input",e=>{
     const pl=S.plies[i];
     pl.man=Object.assign({},MAN_DEFAULT,pl.man||{});
     pl.man[el.dataset.man]=parseFloat(el.value)||0;
+    if(pl.libPly){ delete pl.libPly; const sel=el.closest(".layer").querySelector('select[data-k="fib"]'); if(sel) sel.value="custom"; }
     update(false); return;
   }
   const k=el.dataset.k;
@@ -2080,9 +2175,16 @@ layersEl.addEventListener("change",e=>{
   const el=e.target,i=+el.dataset.i,k=el.dataset.k;
   if(isNaN(i)||el.tagName!=="SELECT") return;
   if(k==="type") S.plies[i].type=el.value;
+  if(k==="fib" && el.value==="__new"){ renderLayers(); openFiberModal("",i); return; }
   if(k==="fib"){
-    S.plies[i].fib=el.value;
-    if(el.value==="custom" && !S.plies[i].man) S.plies[i].man=Object.assign({},MAN_DEFAULT);
+    if(el.value.indexOf("ply:")===0){
+      const id=el.value.slice(4), lp=LIB.plies[id];
+      S.plies[i].fib="custom"; S.plies[i].libPly=id; S.plies[i].libName=lp?lp.name:"";
+      S.plies[i].man=Object.assign({},MAN_DEFAULT,lp?lp.man:{});
+    } else {
+      S.plies[i].fib=el.value; delete S.plies[i].libPly;
+      if(el.value==="custom" && !S.plies[i].man) S.plies[i].man=Object.assign({},MAN_DEFAULT);
+    }
   }
   renderLayers(); update();
 });
@@ -2139,6 +2241,260 @@ document.getElementById("copyBtn").addEventListener("click",async()=>{
   catch(_){ msg.textContent="select the text to copy it"; }
   setTimeout(()=>msg.textContent="",2200);
 });
+/* ===================================================================
+   LIBRARY — user fibers, resins and plies; local or synced to account
+   =================================================================== */
+function fiberOptions(p){
+  const opt=(v,t,sel)=>'<option value="'+esc(v)+'"'+(sel?" selected":"")+'>'+esc(t)+'</option>';
+  const cat=Object.keys(FIBERS).filter(k=>k.indexOf("u_")!==0);
+  const mine=Object.keys(FIBERS).filter(k=>k.indexOf("u_")===0);
+  const plies=Object.entries(LIB.plies);
+  let h='<optgroup label="catalogue">'+cat.map(k=>opt(k,FIBERS[k].name,p.fib===k)).join("")+'</optgroup>';
+  h+='<optgroup label="my fibers">'+mine.map(k=>opt(k,FIBERS[k].name,p.fib===k)).join("")+opt("__new","＋ add a fiber…",false)+'</optgroup>';
+  if(plies.length) h+='<optgroup label="my plies">'+plies.map(([id,v])=>opt("ply:"+id,v.name,p.fib==="custom"&&p.libPly===id)).join("")+'</optgroup>';
+  h+=opt("custom","Custom constants",p.fib==="custom"&&!(p.libPly&&LIB.plies[p.libPly]));
+  return h;
+}
+function fillResinSelect(){
+  const opt=(k)=>'<option value="'+esc(k)+'"'+(S.res===k?" selected":"")+'>'+esc(RESINS[k].name)+'</option>';
+  const cat=Object.keys(RESINS).filter(k=>k.indexOf("u_")!==0&&k!=="custom");
+  const mine=Object.keys(RESINS).filter(k=>k.indexOf("u_")===0);
+  document.getElementById("res").innerHTML=
+    '<optgroup label="catalogue">'+cat.map(opt).join("")+'</optgroup>'+
+    (mine.length?'<optgroup label="my resins">'+mine.map(opt).join("")+'</optgroup>':'')+opt("custom");
+}
+const num=(v,d)=>{const x=parseFloat(v);return isFinite(x)?x:d;};
+const uid8=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+/* merge the library into the live catalogues */
+function applyLibrary(){
+  Object.keys(FIBERS).filter(k=>k.indexOf("u_")===0).forEach(k=>{delete FIBERS[k];delete FIBER_COLOR[k];delete VF_REC[k];});
+  Object.keys(RESINS).filter(k=>k.indexOf("u_")===0).forEach(k=>delete RESINS[k]);
+  Object.entries(LIB.fibers).forEach(([id,f])=>{
+    const k="u_"+id;
+    FIBERS[k]={name:f.name,EL:f.EL,ET:f.ET,G:f.G,G23:f.G23,nu:f.nu,rho:f.rho,st:f.st,sc:f.sc,a1:f.a1,a2:f.a2,
+               form:f.form||undefined,col:parseInt((f.col||"#5b6770").slice(1),16)};
+    FIBER_COLOR[k]=f.col||"#5B6770";
+    VF_REC[k]=f.form==="mat"?{lo:0.15,hi:0.32,typ:0.25,how:"chopped mat"}:{lo:0.45,hi:0.62,typ:0.55,how:"infusion or prepreg"};
+  });
+  Object.entries(LIB.resins).forEach(([id,r])=>{
+    RESINS["u_"+id]={name:r.name,E:r.E,nu:r.nu,rho:r.rho,st:r.st,sc:r.sc,a:r.a};
+  });
+  S.plies.forEach(p=>{
+    if(p.fib.indexOf("u_")===0 && !FIBERS[p.fib]) p.fib="carbon_hr";
+    if(p.libPly && !LIB.plies[p.libPly]) delete p.libPly;
+  });
+  if(!RESINS[S.res]) S.res="epoxy_std";
+  if(typeof FIBER_MATS!=="undefined") for(const k in FIBER_MATS) delete FIBER_MATS[k];
+  fillResinSelect(); fillResinInputs(); renderLayers(); update(); renderLibrary();
+}
+
+/* ---------- storage ---------- */
+const LSKEY="laminae.library.v1";
+let AUTH=null, DB=null, USER=null, syncNote="saved in this browser";
+function loadLocal(){
+  try{ const o=JSON.parse(localStorage.getItem(LSKEY)||"null");
+       if(o) ["fibers","resins","plies"].forEach(k=>Object.assign(LIB[k],o[k]||{})); }catch(_){}
+}
+function saveLocal(){ try{ localStorage.setItem(LSKEY,JSON.stringify(LIB)); }catch(_){} }
+async function persist(){
+  saveLocal();
+  if(USER&&DB){
+    try{ syncNote="saving…"; renderAcctNote();
+      await DB.collection("libraries").doc(USER.uid).set({fibers:LIB.fibers,resins:LIB.resins,plies:LIB.plies,
+        updated:new Date().toISOString()});
+      syncNote="synced to your account"; }
+    catch(e){ syncNote="sync failed — kept in this browser"; }
+  } else syncNote="saved in this browser";
+  renderAcctNote();
+}
+async function pullCloud(){
+  if(!(USER&&DB)) return;
+  try{
+    syncNote="loading your library…"; renderAcctNote();
+    const snap=await DB.collection("libraries").doc(USER.uid).get();
+    const cloud=snap.exists?snap.data():{};
+    /* union: cloud wins on the same id, local-only items are uploaded */
+    ["fibers","resins","plies"].forEach(k=>{ LIB[k]=Object.assign({},LIB[k],cloud[k]||{}); });
+    applyLibrary(); await persist();
+  }catch(e){ syncNote="could not reach your account"; renderAcctNote(); }
+}
+
+/* ---------- Firebase ---------- */
+const FB_VER="10.14.1";
+function loadScript(src){return new Promise((ok,ko)=>{const t=document.createElement("script");t.src=src;t.onload=ok;t.onerror=ko;document.head.appendChild(t);});}
+async function initFirebase(){
+  if(!FIREBASE_CONFIG.apiKey){ renderAcct(); return; }
+  try{
+    const base="https://cdn.jsdelivr.net/npm/firebase@"+FB_VER+"/";
+    await loadScript(base+"firebase-app-compat.js");
+    await loadScript(base+"firebase-auth-compat.js");
+    await loadScript(base+"firebase-firestore-compat.js");
+    firebase.initializeApp(FIREBASE_CONFIG);
+    AUTH=firebase.auth(); DB=firebase.firestore();
+    AUTH.onAuthStateChanged(u=>{ USER=u; document.getElementById("mark").classList.toggle("signed",!!u); renderAcct(); if(u) pullCloud(); else { syncNote="saved in this browser"; renderAcctNote(); } });
+  }catch(e){ AUTH=null; renderAcct("Account service unreachable — library kept in this browser."); }
+}
+const AUTH_ERR={
+  "auth/invalid-email":"That email address is not valid.",
+  "auth/missing-password":"Enter a password.",
+  "auth/weak-password":"Password must be at least 6 characters.",
+  "auth/email-already-in-use":"An account already exists with this email — sign in instead.",
+  "auth/invalid-credential":"Wrong email or password.",
+  "auth/wrong-password":"Wrong email or password.",
+  "auth/user-not-found":"No account with this email.",
+  "auth/too-many-requests":"Too many attempts — wait a moment and retry.",
+  "auth/popup-closed-by-user":"Google sign-in was closed before finishing.",
+  "auth/popup-blocked":"The browser blocked the Google window — allow pop-ups for this site.",
+  "auth/unauthorized-domain":"This site's address is not authorised in Firebase yet.",
+  "auth/network-request-failed":"Network error — check your connection."
+};
+function amsg(t,cls){ const m=document.getElementById("amsg"); if(m){ m.textContent=t||""; m.className="amsg"+(cls?" "+cls:""); } }
+async function authDo(kind){
+  if(!AUTH) return;
+  const em=(document.getElementById("aEmail")||{}).value||"", pw=(document.getElementById("aPass")||{}).value||"";
+  try{
+    amsg("…");
+    if(kind==="google") await AUTH.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    else if(kind==="in") await AUTH.signInWithEmailAndPassword(em.trim(),pw);
+    else if(kind==="up") await AUTH.createUserWithEmailAndPassword(em.trim(),pw);
+    else if(kind==="reset"){ await AUTH.sendPasswordResetEmail(em.trim()); amsg("Reset link sent to "+em.trim()+".","ok"); return; }
+    else if(kind==="out"){ await AUTH.signOut(); return; }
+    amsg("");
+  }catch(e){ amsg(AUTH_ERR[e.code]||e.message,"err"); }
+}
+const GLOGO='<svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.6 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
+function renderAcctNote(){ const n=document.getElementById("syncNote"); if(n) n.textContent=syncNote; }
+function renderAcct(err){
+  const h=document.getElementById("acct"); if(!h) return;
+  if(!AUTH){
+    h.innerHTML='<div class="acct"><div class="mini" style="margin:0">'+esc(err||"Sign-in is not enabled on this site. Your library is kept in this browser — use the backup buttons below to move it.")+
+      '</div><div class="sync" id="syncNote"></div></div>';
+  } else if(USER){
+    const nm=USER.displayName||USER.email||"account";
+    h.innerHTML='<div class="acct"><div class="who">'+
+      (USER.photoURL?'<img src="'+esc(USER.photoURL)+'" alt="" referrerpolicy="no-referrer">':'<span class="av">'+esc(nm[0].toUpperCase())+'</span>')+
+      '<div style="flex:1;min-width:0"><b>'+esc(nm)+'</b><small>'+esc(USER.email||"")+'</small></div>'+
+      '<button class="btn" id="aOut">sign out</button></div><div class="sync" id="syncNote"></div></div>';
+    document.getElementById("aOut").onclick=()=>authDo("out");
+  } else {
+    h.innerHTML='<div class="acct"><div class="mini" style="margin:0 0 10px;color:var(--ink-2)">Sign in to keep your fibers, resins and plies on every device.</div>'+
+      '<button class="gbtn" id="aGoogle">'+GLOGO+'Continue with Google</button>'+
+      '<div class="or">or with email</div>'+
+      '<input type="email" id="aEmail" placeholder="email" autocomplete="email">'+
+      '<input type="password" id="aPass" placeholder="password" autocomplete="current-password">'+
+      '<div class="btnrow"><button class="btn primary" id="aIn">sign in</button><button class="btn" id="aUp">create account</button>'+
+      '<button class="linkbtn" id="aReset" style="margin-left:auto">forgot password?</button></div>'+
+      '<p class="amsg" id="amsg"></p><div class="sync" id="syncNote"></div></div>';
+    document.getElementById("aGoogle").onclick=()=>authDo("google");
+    document.getElementById("aIn").onclick=()=>authDo("in");
+    document.getElementById("aUp").onclick=()=>authDo("up");
+    document.getElementById("aReset").onclick=()=>authDo("reset");
+    document.getElementById("aPass").addEventListener("keydown",e=>{ if(e.key==="Enter") authDo("in"); });
+  }
+  renderAcctNote();
+}
+
+/* ---------- lists ---------- */
+function itemRow(kind,id,name,meta,dot){
+  return '<div class="item">'+(dot?'<span class="dot" style="background:'+esc(dot)+'"></span>':'')+
+    '<span class="nm" title="'+esc(name)+'">'+esc(name)+'</span><span class="meta">'+meta+'</span>'+
+    (kind==="fibers"?'<button data-edit="'+esc(id)+'">edit</button>':'')+
+    '<button class="del" data-kind="'+kind+'" data-del="'+esc(id)+'">✕</button></div>';
+}
+function renderLibrary(){
+  const F=Object.entries(LIB.fibers), R=Object.entries(LIB.resins), P=Object.entries(LIB.plies);
+  const set=(id,html)=>{ const e=document.getElementById(id); if(e) e.innerHTML=html; };
+  set("libFibers",F.length?F.map(([id,f])=>itemRow("fibers",id,f.name,f.EL+" GPa"+(f.form==="mat"?" · mat":""),f.col)).join(""):'<div class="empty">No fiber saved yet.</div>');
+  set("libResins",R.length?R.map(([id,r])=>itemRow("resins",id,r.name,Math.round(r.E*1000)+" MPa")).join(""):'<div class="empty">No resin saved yet.</div>');
+  set("libPlies",P.length?P.map(([id,p])=>itemRow("plies",id,p.name,(+p.man.E1).toFixed(0)+" / "+(+p.man.E2).toFixed(1)+" GPa")).join(""):'<div class="empty">No ply saved yet.</div>');
+}
+const FF=[["ffEL","EL",230],["ffET","ET",18.4],["ffG","G",16.6],["ffG23","G23",7],["ffNu","nu",0.24],["ffRho","rho",1800],
+          ["ffSt","st",4900],["ffSc","sc",1800],["ffA1","a1",-0.5],["ffA2","a2",10]];
+function fillFiberForm(id){
+  const f=id?LIB.fibers[id]:null;
+  document.getElementById("ffId").value=id||"";
+  document.getElementById("ffName").value=f?f.name:"";
+  document.getElementById("ffForm").value=f&&f.form==="mat"?"mat":"";
+  document.getElementById("ffCol").value=f&&f.col?f.col:"#16181c";
+  FF.forEach(([el,k,d])=>{ document.getElementById(el).value=f?f[k]:d; });
+  document.getElementById("fibFormTitle").textContent=id?"edit "+(f?f.name:"fiber"):"add a fiber";
+}
+let fibTarget=-1;            /* layer that asked for a new fiber, if any */
+function openFiberModal(id,layer){
+  fibTarget=layer==null?-1:layer;
+  fillFiberForm(id||"");
+  document.getElementById("fibModal").hidden=false; document.getElementById("fibModalBg").hidden=false;
+  setTimeout(()=>{ const n=document.getElementById("ffName"); if(n&&n.focus) n.focus(); },30);
+}
+function closeFiberModal(){ document.getElementById("fibModal").hidden=true; document.getElementById("fibModalBg").hidden=true; fibTarget=-1; }
+
+/* ---------- wiring ---------- */
+document.getElementById("ffCancel").onclick=closeFiberModal;
+document.getElementById("ffClose").onclick=closeFiberModal;
+document.getElementById("fibModalBg").onclick=closeFiberModal;
+document.getElementById("addFiberBtn").onclick=e=>{ e.stopPropagation(); openFiberModal("",null); };
+document.getElementById("ffSave").onclick=()=>{
+  const name=document.getElementById("ffName").value.trim();
+  if(!name){ document.getElementById("ffName").focus(); return; }
+  const id=document.getElementById("ffId").value||uid8(), f={name,form:document.getElementById("ffForm").value||"",col:document.getElementById("ffCol").value};
+  FF.forEach(([el,k,d])=>{ f[k]=num(document.getElementById(el).value,d); });
+  f.EL=Math.max(0.1,f.EL); f.ET=Math.max(0.1,f.ET); f.G=Math.max(0.05,f.G); f.G23=Math.max(0.05,f.G23); f.rho=Math.max(100,f.rho);
+  LIB.fibers[id]=f;
+  if(fibTarget>=0 && S.plies[fibTarget]){ S.plies[fibTarget].fib="u_"+id; delete S.plies[fibTarget].libPly; }
+  closeFiberModal();
+  applyLibrary(); persist();
+};
+document.getElementById("acctCard").addEventListener("click",e=>{
+  const ed=e.target.closest("[data-edit]");
+  if(ed){ e.stopPropagation(); openFiberModal(ed.dataset.edit,null); return; }
+  const d=e.target.closest("[data-del]");
+  if(d){
+    if(!d.classList.contains("arm")){ d.classList.add("arm"); d.textContent="delete?";
+      setTimeout(()=>{ if(d.isConnected){ d.classList.remove("arm"); d.textContent="✕"; } },2500); return; }
+    delete LIB[d.dataset.kind][d.dataset.del];
+    applyLibrary(); persist();
+  }
+});
+document.getElementById("resSave").onclick=()=>{
+  const inp=document.getElementById("resSaveName"), r=RESINS[S.res];
+  const name=inp.value.trim()||(S.res==="custom"?"My resin":r.name+" (copy)");
+  const id=S.res.indexOf("u_")===0 && !inp.value.trim() ? S.res.slice(2) : uid8();
+  LIB.resins[id]={name,E:r.E,nu:r.nu,rho:r.rho,st:r.st,sc:r.sc,a:r.a};
+  inp.value=""; S.res="u_"+id;
+  applyLibrary(); persist();
+};
+document.getElementById("layers").addEventListener("click",e=>{
+  const b=e.target.closest("[data-saveply]"); if(!b) return;
+  e.stopPropagation();
+  const i=+b.dataset.saveply, p=S.plies[i];
+  const nmEl=document.querySelector('.plyname[data-i="'+i+'"]');
+  const name=(nmEl&&nmEl.value.trim())||"Custom ply "+(Object.keys(LIB.plies).length+1);
+  const id=p.libPly&&LIB.plies[p.libPly]&&LIB.plies[p.libPly].name===name?p.libPly:uid8();
+  LIB.plies[id]={name,man:Object.assign({},MAN_DEFAULT,p.man||{})};
+  p.libPly=id; p.libName=name;
+  applyLibrary(); persist();
+},true);
+document.getElementById("libExport").onclick=()=>{
+  const blob=new Blob([JSON.stringify({app:"laminae",version:1,library:LIB},null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="laminae-library.json";
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+};
+document.getElementById("libImport").onchange=async e=>{
+  const file=e.target.files&&e.target.files[0]; if(!file) return;
+  try{
+    const o=JSON.parse(await file.text()), L=o.library||o;
+    ["fibers","resins","plies"].forEach(k=>{ if(L[k]&&typeof L[k]==="object") Object.assign(LIB[k],L[k]); });
+    applyLibrary(); persist();
+  }catch(_){ syncNote="that file is not a Laminae library"; renderAcctNote(); }
+  e.target.value="";
+};
+
+loadLocal();
+applyLibrary();
+renderAcct();
+initFirebase();
+
 </script>
 </body>
 </html>
