@@ -218,6 +218,13 @@ table.res tr:last-child td{border-bottom:none}
 table.res td.d{color:var(--ink-2)}
 table.res td.v{font-family:var(--mono);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;padding-left:10px}
 table.res td.u{color:var(--ink-3);font-size:11px;width:1%;white-space:nowrap;padding-left:7px;font-family:var(--mono)}
+.pf{display:grid;grid-template-columns:40px 1fr 1fr 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.pf:last-of-type{border-bottom:none}
+.pf-n{color:var(--ink-2);font-size:13px}
+.pf-c{text-align:right;min-width:0}
+.pf-c b{display:block;font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums}
+.pf-c span{display:block;font-family:var(--mono);font-size:10.5px;line-height:1.35;color:var(--ink-3);overflow-wrap:anywhere}
+.pf-h{padding-top:0}.pf-h .pf-n{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
 .note{border-left:2px solid var(--soft-2);padding:7px 0 7px 11px;font-size:12px;color:var(--ink-3);margin:12px 0 0}
 .note.warn{border-left-color:var(--ink);color:var(--ink-2)}
 .note.bad{border-left-color:var(--bad);color:var(--bad)}
@@ -1407,18 +1414,15 @@ function renderStrength(r){
   const plyTxt=(s,mx)=>{
     if(!s) return "—";
     const p=s.plies.map(k=>k+1), a=[...new Set(s.plies.map(k=>r.layers[k].a))];
-    return (p.length>1?"plies ":"ply ")+(p.length>4?p.slice(0,4).join(",")+"…":p.join(","))+" @ "+a.map(x=>x+"°").join("/")+" · "+s.modes.join("+");
+    return (p.length>1?"plies ":"ply ")+(p.length>4?p.slice(0,4).join(",")+"…":p.join(","))+" · "+a.map(x=>x+"°").join("/")+" · "+s.modes.join("+");
   };
   const pct=x=>isFinite(x)?(Math.abs(x)*100).toFixed(2)+" %":"—";
+  const cell=(v,s)=>'<div class="pf-c"><b>'+v+'</b><span>'+s+'</span></div>';
   const rows=r.prog.map(c=>{
     const s1=c.steps[0], s2=c.steps[1];
-    return '<tr><td class="d" rowspan="2"'+tipAttr(c.name)+'>'+c.name+'</td>'+
-      '<td class="v">'+(s1?f(s1.load,0):"—")+'</td>'+
-      '<td class="v">'+(s2?f(s2.load,0):"—")+'</td>'+
-      '<td class="v">'+(isFinite(c.ult)?f(c.ult,0):"—")+'</td></tr>'+
-      '<tr><td class="u" style="text-align:right">'+plyTxt(s1)+'</td>'+
-      '<td class="u" style="text-align:right">'+plyTxt(s2)+'</td>'+
-      '<td class="u" style="text-align:right">'+(c.ultStep>=0?"step "+(c.ultStep+1):"")+'</td></tr>';
+    return '<div class="pf"><div class="pf-n"'+tipAttr(c.name)+'>'+c.name+'</div>'+
+      cell(s1?f(s1.load,0):"—",plyTxt(s1))+cell(s2?f(s2.load,0):"—",s2?plyTxt(s2):"")+
+      cell(isFinite(c.ult)?f(c.ult,0):"—",c.ultStep>=0?"step "+(c.ultStep+1)+" of "+c.steps.length:"")+'</div>';
   }).join("");
   const elas=r.prog.map(c=>{
     const s1=c.steps[0];
@@ -1437,10 +1441,10 @@ function renderStrength(r){
     tbl(elas)+
     '<div class="sect">ply-by-ply rupture · '+CRIT+'</div>'+
     '<p class="mini">Laminate average stress (MPa) at which the 1st, then the 2nd ply group fails, and the ultimate load. After each failure the ply is degraded — matrix crack: E₂, G₁₂ → 0; fiber break: ply → 0 — A is rebuilt and the load raised again.</p>'+
-    '<table class="res"><tr><td class="u">load</td>'+
-      '<td class="u" style="text-align:right" data-tipkey="fpf" data-tip-title="first ply failure">1st ply</td>'+
-      '<td class="u" style="text-align:right" data-tipkey="spf" data-tip-title="second ply failure">2nd ply</td>'+
-      '<td class="u" style="text-align:right" data-tipkey="lpf" data-tip-title="ultimate">ultimate</td></tr>'+rows+'</table>'+
+    '<div class="pf pf-h"><div class="pf-n">load</div>'+
+      '<div class="pf-c" data-tipkey="fpf" data-tip-title="first ply failure"><span>1st ply</span></div>'+
+      '<div class="pf-c" data-tipkey="spf" data-tip-title="second ply failure"><span>2nd ply</span></div>'+
+      '<div class="pf-c" data-tipkey="lpf" data-tip-title="ultimate"><span>ultimate</span></div></div>'+rows+
     '<div class="note">Membrane loads only, load-controlled, plies with the same angle and material fail together. A 2nd failure lower than the 1st means the first crack immediately overloads the next ply. The degraded model is a standard estimate (ply discount): use it to rank laminates, test coupons for design values.</div>'+
     '<details class="more"><summary>full failure sequence</summary>'+seq+'</details>'+
     '<details class="more"><summary>ply strengths used</summary>'+
