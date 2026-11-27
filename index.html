@@ -225,6 +225,7 @@ table.res td.u{color:var(--ink-3);font-size:11px;width:1%;white-space:nowrap;pad
 .pf-c b{display:block;font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums}
 .pf-c span{display:block;font-family:var(--mono);font-size:10.5px;line-height:1.35;color:var(--ink-3);overflow-wrap:anywhere}
 .pf-h{padding-top:0}.pf-h .pf-n{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.ppsrc{font-family:var(--mono);font-size:10.5px;line-height:1.4;color:var(--ink-3);margin:6px 0 0}
 .note{border-left:2px solid var(--soft-2);padding:7px 0 7px 11px;font-size:12px;color:var(--ink-3);margin:12px 0 0}
 .note.warn{border-left-color:var(--ink);color:var(--ink-2)}
 .note.bad{border-left-color:var(--bad);color:var(--bad)}
@@ -648,6 +649,180 @@ const VF_REC = {
   flax:     {lo:0.28,hi:0.48,typ:0.40,how:"infusion, limited by fiber packing"},
   custom:   {lo:0.30,hi:0.65,typ:0.55,how:"process dependent"}
 };
+/* ===================================================================
+   EXTENDED CATALOGUE — manufacturer product data sheets.
+   Fibers: tensile modulus EL, tensile strength st (impregnated strand)
+   and density are the datasheet values. Transverse/shear constants,
+   fiber compressive strength and CTE are class values (not published
+   per product) taken from the family template. Resins: neat cured
+   resin data sheets. Prepregs: cured unidirectional/woven ply data
+   from the prepreg data sheet; values marked "est." in src are
+   typical for the class (not on the sheet).
+   =================================================================== */
+(function(){
+  const T={sm:FIBERS.carbon_hr, im:FIBERS.carbon_im, hm:FIBERS.carbon_hm};
+  const REC={
+    sm:{lo:0.50,hi:0.65,typ:0.55,how:"infusion or prepreg"},
+    im:{lo:0.55,hi:0.68,typ:0.60,how:"autoclave prepreg"},
+    hm:{lo:0.50,hi:0.62,typ:0.55,how:"prepreg"},
+    glass:{lo:0.45,hi:0.62,typ:0.52,how:"infusion, filament winding or prepreg"},
+    org:{lo:0.45,hi:0.62,typ:0.55,how:"infusion or prepreg"},
+    pe:{lo:0.45,hi:0.65,typ:0.55,how:"press or prepreg, low-temperature resin"},
+    nat:{lo:0.28,hi:0.48,typ:0.40,how:"infusion, limited by fiber packing"}
+  };
+  const css=n=>"#"+n.toString(16).padStart(6,"0");
+  const add=(key,cls,tpl,o)=>{
+    const f=Object.assign({},tpl,{rec:undefined,form:undefined},o);
+    f.col=o.col!=null?o.col:tpl.col; f.fam=o.fam;
+    FIBERS[key]=f; FIBER_COLOR[key]=css(f.col); VF_REC[key]=REC[cls];
+  };
+  /* PAN carbon: [key, name, EL GPa, st MPa, rho kg/m3, a1 1e-6/K, source] */
+  const sm=[
+   ["toray_t300","Toray T300",230,3530,1760,-0.41],
+   ["toray_t400h","Toray T400H",250,4410,1800,-0.45],
+   ["toray_t700s","Toray T700S",230,4900,1800,-0.38],
+   ["toray_t700g","Toray T700G",240,4900,1780,-0.38],
+   ["hexcel_as4","Hexcel HexTow AS4",231,4447,1790,-0.63],
+   ["hexcel_as4c","Hexcel HexTow AS4C",231,4654,1780,-0.63],
+   ["hexcel_as7","Hexcel HexTow AS7",241,4830,1790,-0.6],
+   ["teijin_hta40","Teijin Tenax HTA40",238,3950,1760,-0.1],
+   ["teijin_hts40","Teijin Tenax HTS40",240,4400,1770,-0.1],
+   ["teijin_sts40","Teijin Tenax STS40",250,4300,1780,-0.1],
+   ["teijin_uts50","Teijin Tenax UTS50",245,5100,1780,-0.1],
+   ["mcc_tr30s","Mitsubishi Pyrofil TR30S",235,4410,1790,-0.5],
+   ["mcc_tr50s","Mitsubishi Pyrofil TR50S",240,4900,1820,-0.5],
+   ["zoltek_px35","Zoltek PX35 (50K)",242,4137,1810,-0.5],
+   ["sgl_c_t50","SGL Sigrafil C T50-4.0/240",240,4000,1800,-0.5]];
+  sm.forEach(([k,n,E,st,r,a])=>add(k,"sm",T.sm,{name:n,EL:E,st,rho:r,a1:a,sc:Math.round(0.38*st),fam:"carbon · standard modulus",
+    src:n.split(" ")[0]+" fiber data sheet: E, σ, ρ"}));
+  const im=[
+   ["toray_t800s","Toray T800S",294,5880,1800,-0.56],
+   ["toray_t800h","Toray T800H",294,5490,1810,-0.56],
+   ["toray_t1000g","Toray T1000G",294,6370,1800,-0.55],
+   ["toray_t1100g","Toray T1100G",324,7000,1790,-0.5],
+   ["toray_m30s","Toray M30S",294,5490,1730,-0.6],
+   ["hexcel_im7","Hexcel HexTow IM7",276,5654,1780,-0.64],
+   ["hexcel_im8","Hexcel HexTow IM8",304,6067,1790,-0.6],
+   ["hexcel_im9","Hexcel HexTow IM9",304,6137,1800,-0.6],
+   ["hexcel_im10","Hexcel HexTow IM10",310,6964,1790,-0.6],
+   ["teijin_ims65","Teijin Tenax IMS65",290,6000,1780,-0.1],
+   ["mcc_mr60h","Mitsubishi Pyrofil MR60H",290,5680,1810,-0.6]];
+  im.forEach(([k,n,E,st,r,a])=>add(k,"im",T.im,{name:n,EL:E,st,rho:r,a1:a,sc:Math.round(0.36*st),fam:"carbon · intermediate modulus",
+    src:n.split(" ")[0]+" fiber data sheet: E, σ, ρ"}));
+  /* high modulus PAN: ET falls as EL rises */
+  const hm=[
+   ["toray_m35j","Toray M35J",343,4700,1750,-0.73,8.5],
+   ["toray_m40j","Toray M40J",377,4400,1770,-0.83,8.0],
+   ["toray_m40","Toray M40",392,2740,1810,-1.2,7.0],
+   ["toray_m46j","Toray M46J",436,4200,1840,-0.9,6.5],
+   ["toray_m50j","Toray M50J",475,4120,1880,-1.0,6.0],
+   ["toray_m55j","Toray M55J",540,4020,1910,-1.1,5.8],
+   ["toray_m60j","Toray M60J",588,3820,1930,-1.1,5.5],
+   ["mcc_hr40","Mitsubishi Pyrofil HR40",390,4410,1820,-1.0,7.5]];
+  hm.forEach(([k,n,E,st,r,a,ET])=>add(k,"hm",T.hm,{name:n,EL:E,st,rho:r,a1:a,ET,G23:ET/2.7,sc:Math.round(0.32*st),fam:"carbon · high modulus",
+    src:n.split(" ")[0]+" fiber data sheet: E, σ, ρ"}));
+  /* pitch based ultra high modulus */
+  const uhm=[
+   ["mcc_k63712","Mitsubishi Dialead K63712 (pitch)",640,2600,2120,-1.3],
+   ["mcc_k13c2u","Mitsubishi Dialead K13C2U (pitch)",900,3800,2200,-1.4],
+   ["ngf_ys90a","Nippon Graphite Granoc YS-90A (pitch)",880,3530,2180,-1.4]];
+  uhm.forEach(([k,n,E,st,r,a])=>add(k,"hm",T.hm,{name:n,EL:E,st,rho:r,a1:a,ET:5,G:8,G23:1.9,nu:0.25,sc:Math.round(0.15*st),col:0x26292E,
+    fam:"carbon · ultra high modulus (pitch)",src:n.split(" ")[0]+" fiber data sheet: E, σ, ρ; low compressive strength"}));
+  /* glass rovings, isotropic */
+  const gl=(k,n,E,st,r,a,col,src)=>add(k,"glass",FIBERS.glass_e,{name:n,EL:E,ET:E,G:E/2.44,G23:E/2.44,nu:0.22,st,sc:Math.round(0.55*st),rho:r,a1:a,a2:a,col,fam:"glass & quartz",src});
+  gl("glass_e_rov","E-glass roving (Owens Corning Advantex)",80,3400,2620,6.0,0xB2B9BE,"Owens Corning Advantex roving data sheet");
+  gl("glass_ecr_rov","ECR-glass roving",80.3,3450,2620,6.0,0xB2B9BE,"E-CR glass typical data sheet values");
+  gl("glass_r_rov","R-glass roving (Saint-Gobain / 3B R)",86,4400,2550,4.0,0xC7CED3,"R-glass data sheet");
+  gl("glass_s2","S-2 Glass (AGY)",86.9,4890,2460,1.6,0xC7CED3,"AGY S-2 Glass data sheet");
+  gl("quartz_qz","Quartz fiber (Saint-Gobain Quartzel)",78,6000,2200,0.54,0xE4E7EA,"Saint-Gobain Quartzel data sheet (virgin filament strength)");
+  ["glass_e_rov","glass_ecr_rov","glass_r_rov","glass_s2","quartz_qz"].forEach(k=>delete FIBERS[k].form);
+  /* organic high performance fibers */
+  const org=(k,n,o)=>add(k,o.cls||"org",FIBERS.aramid,Object.assign({fam:"aramid & polymer fibers"},o,{name:n}));
+  org("kevlar29","DuPont Kevlar 29",{EL:70.5,st:2920,rho:1440,src:"DuPont Kevlar data sheet"});
+  org("kevlar149","DuPont Kevlar 149",{EL:179,st:3450,rho:1470,ET:5,G:2.5,src:"DuPont Kevlar data sheet"});
+  org("technora","Teijin Technora T-240",{EL:70,st:3000,rho:1390,a1:-6,src:"Teijin Technora data sheet"});
+  org("vectran_ht","Kuraray Vectran HT",{EL:75,st:3200,rho:1410,a1:-4.8,src:"Kuraray Vectran data sheet"});
+  org("zylon_as","Toyobo Zylon AS (PBO)",{EL:180,st:5800,rho:1540,ET:6,G:2.5,a1:-6,col:0xD9A43A,src:"Toyobo Zylon data sheet"});
+  org("zylon_hm","Toyobo Zylon HM (PBO)",{EL:270,st:5800,rho:1560,ET:6,G:2.5,a1:-6,col:0xD9A43A,src:"Toyobo Zylon data sheet"});
+  org("dyneema_sk75","DSM Dyneema SK75 (UHMWPE)",{cls:"pe",EL:116,st:3500,rho:975,ET:3,G:1.2,G23:1.0,nu:0.35,sc:100,a1:-12,a2:100,col:0xF2F2EE,src:"Dyneema SK75 data sheet; compressive strength very low"});
+  org("spectra1000","Honeywell Spectra 1000 (UHMWPE)",{cls:"pe",EL:113,st:3250,rho:970,ET:3,G:1.2,G23:1.0,nu:0.35,sc:100,a1:-12,a2:100,col:0xF2F2EE,src:"Spectra 1000 data sheet"});
+  /* natural fibers: no product sheet, literature typical */
+  add("hemp","nat",FIBERS.flax,{name:"Hemp",EL:45,ET:7,G:2.8,st:690,sc:350,rho:1480,col:0xBFA77A,fam:"natural fibers",src:"typical literature values (natural fiber, scatter ±30 %)"});
+  add("jute","nat",FIBERS.flax,{name:"Jute",EL:26.5,ET:5.5,G:2.2,st:500,sc:250,rho:1460,col:0xB39566,fam:"natural fibers",src:"typical literature values (natural fiber, scatter ±30 %)"});
+  /* families of the original entries */
+  FIBERS.carbon_hr.fam="generic"; FIBERS.carbon_im.fam="generic"; FIBERS.carbon_hm.fam="generic";
+  FIBERS.glass_e.fam="glass & quartz"; FIBERS.glass_s.fam="glass & quartz";
+  FIBERS.glass_e.name="E-glass, chopped strand mat"; FIBERS.glass_s.name="S / R-glass, chopped mat";
+  FIBERS.aramid.fam="aramid & polymer fibers"; FIBERS.aramid.name="DuPont Kevlar 49"; FIBERS.aramid.src="DuPont Kevlar data sheet";
+  FIBERS.aramid.EL=112.4; FIBERS.aramid.st=3000;
+  FIBERS.basalt.fam="glass & quartz"; FIBERS.flax.fam="natural fibers";
+
+  /* ---------------- resins (neat, cured) ---------------- */
+  const R=(k,o)=>{ RESINS[k]=o; };
+  Object.assign(RESINS.epoxy_std,{fam:"generic"}); Object.assign(RESINS.epoxy_ht,{fam:"generic"});
+  Object.assign(RESINS.polyester,{fam:"generic"}); Object.assign(RESINS.vinyl,{fam:"generic"});
+  Object.assign(RESINS.peek,{fam:"thermoplastics",name:"PEEK, Victrex 450G",E:3.7,st:98,rho:1300,a:45,src:"Victrex 450G data sheet"});
+  Object.assign(RESINS.pa6,{fam:"thermoplastics",name:"PA6, BASF Ultramid B3S (dry)",E:3.2,st:85,rho:1130,a:80,src:"BASF Ultramid B3S data sheet, dry as moulded"});
+  const EPI="epoxy · infusion & RTM", EPP="epoxy · prepreg matrix", EPW="epoxy · wet lay-up", PE="polyester & vinyl ester", HT="high temperature", TP="thermoplastics";
+  R("ly1564_3486",{fam:EPI,name:"Huntsman Araldite LY 1564 / Aradur 3486",E:3.1,nu:0.37,rho:1160,st:75,sc:110,a:70,src:"Huntsman data sheet (cure 15 h 50 °C + post-cure)"});
+  R("ly1564_22962",{fam:EPI,name:"Huntsman Araldite LY 1564 / Aradur 22962",E:3.05,nu:0.37,rho:1170,st:80,sc:120,a:65,src:"Huntsman data sheet, E 2.8–3.3 GPa"});
+  R("ly556_917",{fam:EPI,name:"Huntsman Araldite LY 556 / HY 917 / DY 070",E:3.2,nu:0.36,rho:1200,st:85,sc:130,a:60,src:"Huntsman data sheet (anhydride)"});
+  R("rimr135",{fam:EPI,name:"Hexion EPIKOTE RIMR 135 / RIMH 137",E:3.0,nu:0.37,rho:1180,st:70,sc:110,a:70,src:"Hexion data sheet, E 2.7–3.2 GPa"});
+  R("rtm6",{fam:EPI,name:"Hexcel HexFlow RTM6",E:2.89,nu:0.36,rho:1110,st:75,sc:130,a:65,src:"Hexcel RTM6 data sheet"});
+  R("prime20lv",{fam:EPI,name:"Gurit PRIME 20LV",E:3.5,nu:0.37,rho:1140,st:73,sc:100,a:70,src:"Gurit PRIME 20LV data sheet"});
+  R("elium188",{fam:TP,name:"Arkema Elium 188 (acrylic, infusible)",E:3.3,nu:0.38,rho:1190,st:76,sc:110,a:70,src:"Arkema Elium data sheet"});
+  R("west105",{fam:EPW,name:"WEST SYSTEM 105 / 206",E:3.17,nu:0.37,rho:1180,st:50,sc:80,a:65,src:"WEST SYSTEM data sheet"});
+  R("hexply8552",{fam:EPP,name:"Hexcel HexPly 8552",E:4.67,nu:0.37,rho:1300,st:121,sc:180,a:60,src:"Hexcel 8552 data sheet (neat resin)"});
+  R("hexplym21",{fam:EPP,name:"Hexcel HexPly M21",E:3.5,nu:0.38,rho:1280,st:90,sc:150,a:60,src:"Hexcel M21 data sheet (neat resin)"});
+  R("cycom977_3",{fam:EPP,name:"Solvay CYCOM 977-3",E:3.52,nu:0.37,rho:1310,st:90,sc:150,a:57,src:"Cytec/Solvay 977-3 data sheet (neat resin)"});
+  R("polyester_ortho",{fam:PE,name:"Polyester, orthophthalic",E:3.2,nu:0.38,rho:1200,st:55,sc:120,a:95,src:"typical data sheet range"});
+  R("polyester_iso",{fam:PE,name:"Polyester, isophthalic",E:3.6,nu:0.38,rho:1210,st:70,sc:130,a:85,src:"typical data sheet range"});
+  R("derakane411",{fam:PE,name:"INEOS Derakane 411-350 (vinyl ester)",E:3.2,nu:0.37,rho:1140,st:86,sc:120,a:80,src:"Derakane 411-350 data sheet"});
+  R("derakane8084",{fam:PE,name:"INEOS Derakane 8084 (toughened VE)",E:2.9,nu:0.38,rho:1140,st:76,sc:110,a:85,src:"Derakane 8084 data sheet"});
+  R("derakane470",{fam:PE,name:"INEOS Derakane 470-300 (novolac VE)",E:3.6,nu:0.37,rho:1160,st:85,sc:130,a:70,src:"Derakane 470-300 data sheet"});
+  R("phenolic",{fam:HT,name:"Phenolic (fire, smoke, toxicity)",E:3.6,nu:0.35,rho:1250,st:45,sc:110,a:60,src:"typical data sheet range"});
+  R("bmi",{fam:HT,name:"Bismaleimide (BMI, e.g. CYCOM 5250-4)",E:4.6,nu:0.35,rho:1250,st:89,sc:200,a:50,src:"typical BMI data sheet values"});
+  R("cyanate",{fam:HT,name:"Cyanate ester",E:3.1,nu:0.36,rho:1190,st:75,sc:150,a:55,src:"typical cyanate ester data sheet values"});
+  R("pekk7002",{fam:TP,name:"PEKK, Arkema Kepstan 7002",E:3.5,nu:0.38,rho:1290,st:90,sc:130,a:50,src:"Arkema Kepstan data sheet"});
+  R("pei1000",{fam:TP,name:"PEI, SABIC Ultem 1000",E:3.58,nu:0.36,rho:1270,st:110,sc:150,a:56,src:"SABIC Ultem 1000 data sheet"});
+  R("pps",{fam:TP,name:"PPS, unfilled (e.g. Fortron 0214)",E:3.7,nu:0.37,rho:1350,st:85,sc:110,a:50,src:"typical PPS data sheet values"});
+  R("pa12",{fam:TP,name:"PA12",E:1.6,nu:0.40,rho:1010,st:50,sc:60,a:110,src:"typical PA12 data sheet values"});
+  R("pp",{fam:TP,name:"PP homopolymer",E:1.5,nu:0.42,rho:905,st:33,sc:45,a:100,src:"typical PP data sheet values"});
+  R("pc",{fam:TP,name:"Polycarbonate",E:2.4,nu:0.38,rho:1200,st:65,sc:80,a:68,src:"typical PC data sheet values"});
+  /* keep "custom" last */
+  const c=RESINS.custom; delete RESINS.custom; RESINS.custom=c;
+})();
+
+/* ---------------- prepregs: cured ply properties ----------------
+   GPa, MPa, kg/m3; cpt = cured ply thickness mm; faw = fiber g/m2.   */
+const PREPREGS={
+  h8552_as4:{name:"Hexcel HexPly 8552 / AS4 UD", fam:"UD tape", E1:141,E2:9.6,G12:5.2,nu12:0.30,Xt:2207,Xc:1531,Yt:81,Yc:250,S12:114,rho:1580,cpt:0.184,faw:190,vf:0.57,a1:-0.3,
+    src:"Hexcel 8552 data sheet: E1, E2, Xt, Xc, Yt, S12 · G12, ν12, Yc est."},
+  h8552_im7:{name:"Hexcel HexPly 8552 / IM7 UD", fam:"UD tape", E1:164,E2:11.7,G12:5.0,nu12:0.32,Xt:2724,Xc:1690,Yt:64,Yc:250,S12:120,rho:1570,cpt:0.184,faw:190,vf:0.57,a1:-0.3,
+    src:"Hexcel 8552 data sheet: E1, E2, Xt, Xc, Yt, S12 · G12, ν12, Yc est."},
+  h8552_im10:{name:"Hexcel HexPly 8552 / IM10 UD", fam:"UD tape", E1:190,E2:10.5,G12:5.0,nu12:0.32,Xt:3310,Xc:1793,Yt:60,Yc:250,S12:110,rho:1570,cpt:0.184,faw:190,vf:0.57,a1:-0.3,
+    src:"Hexcel HexTow/8552 laminate data: E1, Xt, Xc · E2, G12, ν12, Y, S est."},
+  hm21_t800s:{name:"Hexcel HexPly M21 / T800S UD (268 g/m²)", fam:"UD tape", E1:172,E2:8.9,G12:4.6,nu12:0.35,Xt:3039,Xc:1500,Yt:60,Yc:260,S12:90,rho:1580,cpt:0.262,faw:268,vf:0.566,a1:-0.3,
+    src:"Hexcel M21 data sheet: E1, Xt, ply thickness, Vf · others est."},
+  hm21_ima:{name:"Hexcel HexPly M21 / IMA UD", fam:"UD tape", E1:178,E2:8.9,G12:4.6,nu12:0.35,Xt:3050,Xc:1600,Yt:60,Yc:260,S12:90,rho:1580,cpt:0.184,faw:194,vf:0.59,a1:-0.3,
+    src:"M21/34%/UD194/IMA published E1 · others est."},
+  t2510_t700:{name:"Toray 2510 / T700SC UD (out of autoclave)", fam:"UD tape", E1:125,E2:8.4,G12:4.2,nu12:0.31,Xt:2172,Xc:1448,Yt:44,Yc:200,S12:154,rho:1550,cpt:0.143,faw:150,vf:0.56,a1:-0.3,
+    src:"Toray 2510 data sheet (RTA): E1, E2, Xt, Xc, Yt, S12 · G12, ν12, Yc est."},
+  t350_t700:{name:"Toray T700S / 350 °F semi-toughened epoxy UD", fam:"UD tape", E1:125,E2:8.5,G12:4.4,nu12:0.31,Xt:2450,Xc:1570,Yt:70,Yc:220,S12:98,rho:1560,cpt:0.15,faw:150,vf:0.60,a1:-0.3,
+    src:"Toray T700S data sheet, composite at Vf 60 % · E2, G12, ν12, Yc est."},
+  h8552_s2:{name:"Hexcel HexPly 8552 / S2 glass UD", fam:"UD tape", E1:45,E2:12,G12:4.8,nu12:0.28,Xt:1731,Xc:1000,Yt:50,Yc:180,S12:80,rho:1980,cpt:0.23,faw:285,vf:0.55,a1:5,
+    src:"Hexcel 8552 data sheet: E1, Xt · others est."},
+  h8552_as4_5h:{name:"Hexcel HexPly 8552 / AS4 5-harness (AGP280)", fam:"woven", E1:67,E2:66,G12:5.0,nu12:0.05,Xt:876,Xc:700,Yt:800,Yc:680,S12:100,rho:1570,cpt:0.28,faw:280,vf:0.56,a1:2,
+    src:"Hexcel 8552 data sheet: E1, E2, Xt, Yt · G12, ν12, Xc, Yc, S est."},
+  t2510_t700pw:{name:"Toray 2510 / T700 plain weave", fam:"woven", E1:55.8,E2:56.0,G12:4.0,nu12:0.05,Xt:912,Xc:709,Yt:772,Yc:650,S12:100,rho:1550,cpt:0.22,faw:193,vf:0.52,a1:2,
+    src:"Toray 2510 data sheet (RTA): E1, E2, Xt, Yt, Xc · G12, ν12, Yc, S est."}
+};
+function ppMan(k){
+  const p=PREPREGS[k];
+  return {E1:p.E1,E2:p.E2,G12:p.G12,G23:+(p.E2/2.9).toFixed(2),nu12:p.nu12,nu23:p.fam==="woven"?0.30:0.45,
+          rho:p.rho,a1:p.a1,Xt:p.Xt,Xc:p.Xc,Yt:p.Yt,Yc:p.Yc,S12:p.S12};
+}
+
 function recFor(fib,type){
   if(type==="mat") return {lo:0.15,hi:0.32,typ:0.25,how:"chopped mat, open moulding"};
   const b=VF_REC[fib]||VF_REC.custom;
@@ -935,7 +1110,7 @@ function matSheet(ud){
 }
 const typeTag=t=>t==="fabric"?"WOVEN":t==="mat"?"MAT":"UD";
 const typeLabel=t=>t==="fabric"?"woven":t==="mat"?"random mat sheet":"unidirectional";
-const isGlass=k=>k.indexOf("glass")===0 || !!(FIBERS[k]&&FIBERS[k].form==="mat");
+const isGlass=k=>!!(FIBERS[k]&&FIBERS[k].form==="mat");
 const matName=(fib,type)=>
   (fib==="custom"?"CUSTOM":FIBERS[fib].name.toUpperCase().replace(/[^A-Z0-9]+/g,"_").replace(/^_|_$/g,""))
   +"_"+typeTag(type);
@@ -1084,7 +1259,8 @@ function analyse(){
     if(!cache[key]){
       const ud = l.fib==="custom" ? customLamina(l.man) : udLamina(l.fib);
       const p  = l.type==="fabric" ? fabricLamina(ud) : l.type==="mat" ? matSheet(ud) : ud;
-      const nm=(l.fib==="custom"&&l.libPly&&l.libName)
+      const nm=(l.fib==="custom"&&l.pp&&PREPREGS[l.pp]) ? "PP_"+l.pp.toUpperCase()
+        : (l.fib==="custom"&&l.libPly&&l.libName)
         ? l.libName.toUpperCase().replace(/[^A-Z0-9]+/g,"_").replace(/^_|_$/g,"")+"_"+(l.type==="fabric"?"WOVEN":"UD")
         : matName(l.fib,l.type)+(l.fib==="custom"?"_"+(idx+1):"");
       cache[key]={id:mats.length+1,key,name:nm,fib:l.fib,type:l.type,p};
@@ -2040,11 +2216,12 @@ function renderLayers(){
       '</select>'+
         (S.thickMode==="gsm"?'<span class="derived">'+p.t.toFixed(3)+' mm</span>':'')+
       '</div>'+
+      (p.fib==="custom"&&p.pp&&PREPREGS[p.pp]?'<div class="ppsrc">prepreg · cured ply '+PREPREGS[p.pp].cpt+' mm · V<sub>f</sub> '+Math.round(PREPREGS[p.pp].vf*100)+' % — '+esc(PREPREGS[p.pp].src)+'</div>':"")+
       (p.fib==="custom"?manEditor(p,i):"")+
     '</div>').join("");
 }
 function update(rebuild=true){
-  if(!S.plies.length) S.plies=[{a:0,t:0.25,type:"ud",fib:"carbon_hs",on:true}];
+  if(!S.plies.length) S.plies=[{a:0,t:0.25,type:"ud",fib:"carbon_hr",on:true}];
   let changed=false;
   S.plies.forEach(p=>{
     const w=p.type;
@@ -2249,6 +2426,7 @@ layersEl.addEventListener("input",e=>{
     const pl=S.plies[i];
     pl.man=Object.assign({},MAN_DEFAULT,pl.man||{});
     pl.man[el.dataset.man]=parseFloat(el.value)||0;
+    if(pl.pp){ delete pl.pp; delete pl.libName; }
     if(pl.libPly){ delete pl.libPly; const sel=el.closest(".layer").querySelector('select[data-k="fib"]'); if(sel) sel.value="custom"; }
     update(false); return;
   }
@@ -2274,12 +2452,16 @@ layersEl.addEventListener("change",e=>{
   if(k==="type") S.plies[i].type=el.value;
   if(k==="fib" && el.value==="__new"){ renderLayers(); openFiberModal("",i); return; }
   if(k==="fib"){
-    if(el.value.indexOf("ply:")===0){
+    if(el.value.indexOf("pp:")===0){
+      const k=el.value.slice(3), pp=PREPREGS[k], pl=S.plies[i];
+      pl.fib="custom"; pl.pp=k; pl.libName=pp.name; delete pl.libPly;
+      pl.man=Object.assign({},MAN_DEFAULT,ppMan(k)); pl.type="ud"; pl.t=pp.cpt; pl.gsm=pp.faw;
+    } else if(el.value.indexOf("ply:")===0){
       const id=el.value.slice(4), lp=LIB.plies[id];
-      S.plies[i].fib="custom"; S.plies[i].libPly=id; S.plies[i].libName=lp?lp.name:"";
+      S.plies[i].fib="custom"; S.plies[i].libPly=id; S.plies[i].libName=lp?lp.name:""; delete S.plies[i].pp;
       S.plies[i].man=Object.assign({},MAN_DEFAULT,lp?lp.man:{});
     } else {
-      S.plies[i].fib=el.value; delete S.plies[i].libPly;
+      S.plies[i].fib=el.value; delete S.plies[i].libPly; delete S.plies[i].pp;
       if(el.value==="custom" && !S.plies[i].man) S.plies[i].man=Object.assign({},MAN_DEFAULT);
     }
   }
@@ -2291,11 +2473,12 @@ function plyMat(p){
   if(p.fib==="custom"){
     o.man=Object.assign({},MAN_DEFAULT,p.man||{});
     if(p.libPly){ o.libPly=p.libPly; o.libName=p.libName; }
+    if(p.pp){ o.pp=p.pp; o.libName=p.libName; }
   }
   return o;
 }
 function addLayer(){
-  const last=S.plies[S.plies.length-1]||{a:0,t:0.25,type:"ud",fib:"carbon_hs"};
+  const last=S.plies[S.plies.length-1]||{a:0,t:0.25,type:"ud",fib:"carbon_hr"};
   S.plies.push({a:0,t:last.t,type:last.type,...plyMat(last),gsm:last.gsm||GSM_DEFAULT[last.type]||300,on:true});
   renderLayers(); update();
 }
@@ -2306,7 +2489,7 @@ document.getElementById("mirror").addEventListener("click",()=>{
 });
 document.querySelectorAll(".preset").forEach(b=>b.addEventListener("click",()=>{
   const fab=b.dataset.fabric==="1";
-  const src=S.plies[0]||{fib:"carbon_hs"};
+  const src=S.plies[0]||{fib:"carbon_hr"};
   S.plies=b.dataset.p.split(",").map(a=>({a:+a,t:fab?0.35:0.25,type:fab?"fabric":"ud",...plyMat(src),
     gsm:fab?GSM_DEFAULT.fabric:GSM_DEFAULT.ud,on:true}));
   S.sel=-1; renderLayers(); update();
@@ -2352,22 +2535,30 @@ document.getElementById("copyBtn").addEventListener("click",async()=>{
    LIBRARY — user fibers, resins and plies; local or synced to account
    =================================================================== */
 function fiberOptions(p){
-  const opt=(v,t,sel)=>'<option value="'+esc(v)+'"'+(sel?" selected":"")+'>'+esc(t)+'</option>';
+  const opt=(v,t,sel,tip)=>'<option value="'+esc(v)+'"'+(sel?" selected":"")+(tip?' title="'+esc(tip)+'"':"")+'>'+esc(t)+'</option>';
   const cat=Object.keys(FIBERS).filter(k=>k.indexOf("u_")!==0);
   const mine=Object.keys(FIBERS).filter(k=>k.indexOf("u_")===0);
   const plies=Object.entries(LIB.plies);
-  let h='<optgroup label="catalogue">'+cat.map(k=>opt(k,FIBERS[k].name,p.fib===k)).join("")+'</optgroup>';
+  const fams=[...new Set(cat.map(k=>FIBERS[k].fam||"generic"))];
+  const ftip=f=>f.EL+" GPa · "+f.st+" MPa · "+f.rho+" kg/m³"+(f.src?" — "+f.src:"");
+  let h=fams.map(fm=>'<optgroup label="'+esc(fm)+'">'+cat.filter(k=>(FIBERS[k].fam||"generic")===fm)
+    .map(k=>opt(k,FIBERS[k].name,p.fib===k,ftip(FIBERS[k]))).join("")+'</optgroup>').join("");
+  const pfam=[...new Set(Object.values(PREPREGS).map(v=>v.fam))];
+  h+=pfam.map(fm=>'<optgroup label="prepreg · '+esc(fm)+' (cured ply)">'+Object.entries(PREPREGS).filter(([,v])=>v.fam===fm)
+    .map(([k,v])=>opt("pp:"+k,v.name,p.fib==="custom"&&p.pp===k,v.E1+" / "+v.E2+" GPa · Xt "+v.Xt+" MPa · "+v.cpt+" mm — "+v.src)).join("")+'</optgroup>').join("");
   h+='<optgroup label="my fibers">'+mine.map(k=>opt(k,FIBERS[k].name,p.fib===k)).join("")+opt("__new","＋ add a fiber…",false)+'</optgroup>';
   if(plies.length) h+='<optgroup label="my plies">'+plies.map(([id,v])=>opt("ply:"+id,v.name,p.fib==="custom"&&p.libPly===id)).join("")+'</optgroup>';
-  h+=opt("custom","Custom constants",p.fib==="custom"&&!(p.libPly&&LIB.plies[p.libPly]));
+  h+=opt("custom","Custom constants",p.fib==="custom"&&!(p.libPly&&LIB.plies[p.libPly])&&!(p.pp&&PREPREGS[p.pp]));
   return h;
 }
 function fillResinSelect(){
-  const opt=(k)=>'<option value="'+esc(k)+'"'+(S.res===k?" selected":"")+'>'+esc(RESINS[k].name)+'</option>';
+  const opt=(k)=>{const r=RESINS[k]; return '<option value="'+esc(k)+'"'+(S.res===k?" selected":"")+
+    (r.src?' title="'+esc(r.E+" GPa · "+r.st+" MPa · "+r.rho+" kg/m³ — "+r.src)+'"':"")+'>'+esc(r.name)+'</option>';};
   const cat=Object.keys(RESINS).filter(k=>k.indexOf("u_")!==0&&k!=="custom");
   const mine=Object.keys(RESINS).filter(k=>k.indexOf("u_")===0);
+  const fams=[...new Set(cat.map(k=>RESINS[k].fam||"generic"))];
   document.getElementById("res").innerHTML=
-    '<optgroup label="catalogue">'+cat.map(opt).join("")+'</optgroup>'+
+    fams.map(fm=>'<optgroup label="'+esc(fm)+'">'+cat.filter(k=>(RESINS[k].fam||"generic")===fm).map(opt).join("")+'</optgroup>').join("")+
     (mine.length?'<optgroup label="my resins">'+mine.map(opt).join("")+'</optgroup>':'')+opt("custom");
 }
 const num=(v,d)=>{const x=parseFloat(v);return isFinite(x)?x:d;};
