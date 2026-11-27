@@ -227,6 +227,11 @@ table.res td.u{color:var(--ink-3);font-size:11px;width:1%;white-space:nowrap;pad
 .pf-h{padding-top:0}.pf-h .pf-n{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
 .aipanel .aibody{flex:1;display:flex;flex-direction:column;min-height:0}
 .ailog{flex:1;overflow:auto;padding:14px 18px}
+.aiact{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:8px;text-align:left}
+.aiact ul{margin:6px 0 10px;padding-left:18px;font-size:12.5px;line-height:1.5}
+.aisrc{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;justify-content:flex-start}
+.aisrc a{font-size:11px;color:var(--ink-2);background:var(--soft);border-radius:99px;padding:3px 9px;text-decoration:none;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aisugg{margin-top:6px;text-align:left}
 .aimod{font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-top:3px}
 .aiempty{font-size:12.5px;color:var(--ink-3);line-height:1.5}
 .aim{margin:0 0 12px}.aim.user{text-align:right}
@@ -597,7 +602,7 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
     <p class="aigate" id="aiGate" hidden></p>
     <div class="aiform" id="aiForm">
       <div class="aiatt" id="aiAtt"></div>
-      <textarea id="aiIn" rows="3" placeholder="Paste a data sheet, a screenshot (Ctrl+V) or ask a question…"></textarea>
+      <textarea id="aiIn" rows="3" placeholder="Search a material, paste a data sheet / screenshot (Ctrl+V), or ask to change the laminate…"></textarea>
       <div class="btnrow"><label class="btn" style="cursor:pointer">image / PDF<input type="file" id="aiFile" accept="image/*,application/pdf" multiple hidden></label>
         <span class="mini" style="margin:0 auto 0 4px">Gemini · values to check against the sheet</span>
         <button class="btn primary" id="aiSend">send</button></div>
@@ -2842,7 +2847,7 @@ const AI_CFG={
   models:["gemini-4-hydrogen","gemini-3.8-flash","gemini-3.5-flash-lite"],   // tried in order when one is overloaded (all free tier)
   recaptchaKey:"6Lc17zQuAAAAAOQSMmiOLZ_PTrak8mhYc2vgS8yf"   // App Check, reCAPTCHA Enterprise (Fraud Defense) site key — public
 };
-let AIX=null, AICHAT=null, aiBusy=false, aiPending=[];
+let AIX=null, AICHAT=null, aiBusy=false, aiPending=[], AI_SEARCH=true;
 const AI_LOG=[];               // {role:"user"|"ai", text, items, files}
 const AI_FIELDS={
   fiber:[["EL","E L","GPa"],["ET","E T","GPa"],["G","G LT","GPa"],["G23","G TT","GPa"],["nu","ν LT",""],["rho","ρ","kg/m³"],["st","σ t","MPa"],["sc","σ c","MPa"],["a1","α L","10⁻⁶/K"],["a2","α T","10⁻⁶/K"]],
@@ -2850,18 +2855,33 @@ const AI_FIELDS={
   ply:[["E1","E₁","GPa"],["E2","E₂","GPa"],["G12","G₁₂","GPa"],["G23","G₂₃","GPa"],["nu12","ν₁₂",""],["nu23","ν₂₃",""],["rho","ρ","kg/m³"],["a1","α₁","10⁻⁶/K"],
        ["Xt","Xt","MPa"],["Xc","Xc","MPa"],["Yt","Yt","MPa"],["Yc","Yc","MPa"],["S12","S₁₂","MPa"]]
 };
-const AI_SYS=`You are the material assistant of Laminae, a composite laminate calculator.
-The user pastes product data sheets (text, images or PDF) of fibers, resins or prepregs, and asks questions.
-Answer briefly in the user's language. Each turn return JSON:
-- "reply": your answer (plain text, short).
-- "items": every material whose properties you can read in this turn (empty list if none).
-Item kinds:
-- "fiber": dry reinforcement fiber/filament. Fields EL (tensile modulus), ET, G, G23, nu, rho, st (tensile strength), sc, a1, a2.
-- "resin": neat cured matrix. Fields E, nu, rho, st, sc, a.
-- "ply": cured composite ply / prepreg lamina (0° = fiber direction). Fields E1, E2, G12, G23, nu12, nu23, rho, a1, Xt, Xc, Yt, Yc, S12, cpt (cured ply thickness mm), vf (fiber volume fraction 0-1).
-Units: moduli GPa, strengths MPa, density kg/m3, CTE 1e-6/K. Convert from ksi, Msi, g/cm3, psi, ppm/°F.
-Prefer room temperature dry values. Fill a field only if the sheet states it or it follows directly (e.g. unit conversion).
-Never invent values: leave unknown fields out and list them in "missing". Put any assumption in "note".`;
+const AI_SYS_BASE=`You are the material assistant of Laminae, a composite laminate calculator (micromechanics + classical laminate theory).
+You help the user research fibers, resins and prepregs, read product data sheets (text, images, PDF) and build the laminate.
+You may use Google Search to find manufacturer data sheets. Prefer manufacturer values; say where each value comes from.
+Answer briefly in the user's language.
+
+ALWAYS end your answer with ONE fenced block \`\`\`json ... \`\`\` holding:
+{"reply": "short answer for the user (plain text)",
+ "items": [ materials whose numbers you give, with values ],
+ "actions": [ changes to apply to the calculator, only when the user asks to build/modify the laminate or accepts a proposal ]}
+
+Item: {"kind":"fiber"|"resin"|"ply","name":"...","values":{...},"missing":[...],"note":"source / assumptions"}
+- fiber (dry filament): EL (tensile modulus), ET, G, G23, nu, rho, st (tensile strength), sc, a1, a2
+- resin (neat cured matrix): E, nu, rho, st, sc, a
+- ply (cured lamina / prepreg, 0° = fiber direction): E1, E2, G12, G23, nu12, nu23, rho, a1, Xt, Xc, Yt, Yc, S12, cpt (cured ply thickness mm), vf
+Units: GPa, MPa, kg/m3, 1e-6/K, mm. Convert ksi, Msi, g/cm3, psi. Room temperature dry values.
+Never invent numbers: leave unknown fields out and list them in "missing".
+
+Actions (the user clicks "apply"; keep them minimal):
+- {"op":"add_ply","fiber":KEY,"type":"ud"|"fabric"|"mat","angle":deg,"count":n,"t":mm}
+- {"op":"set_stack","plies":[{"fiber":KEY,"type":...,"angle":...,"t":...}, ...]}   (replaces all plies, bottom to top)
+- {"op":"remove_ply","index":n}   (1 = bottom ply)
+- {"op":"set_resin","resin":KEY}
+- {"op":"set_vf","vf":0.55}
+KEY = a catalogue key below, "pp:<prepreg key>", or "item:<n>" = the n-th item (0-based) of this same answer, added to the user's library first.
+If the catalogue already has the material, use its key instead of creating an item.
+"type" is ignored for prepregs (they are cured plies). Chopped glass mats only accept "mat".`;
+
 
 function aiSchema(S_){
   const n=()=>S_.number();
@@ -2885,11 +2905,16 @@ async function aiInit(){
   const app=A.initializeApp(FIREBASE_CONFIG,"laminae-ai");
   const appCheck=AC.initializeAppCheck(app,{provider:new AC.ReCaptchaEnterpriseProvider(AI_CFG.recaptchaKey),isTokenAutoRefreshEnabled:true});
   const ai=AI.getAI(app,{backend:new AI.GoogleAIBackend(),useLimitedUseAppCheckTokens:true});
-  const cfg={systemInstruction:AI_SYS,generationConfig:{responseMimeType:"application/json",responseSchema:aiSchema(AI.Schema),temperature:0.2}};
+  const cat="\n\nCATALOGUE\nfibers: "+Object.keys(FIBERS).filter(k=>k.indexOf("u_")!==0).map(k=>k+"="+FIBERS[k].name).join("; ")+
+    "\nresins: "+Object.keys(RESINS).filter(k=>k.indexOf("u_")!==0&&k!=="custom").map(k=>k+"="+RESINS[k].name).join("; ")+
+    "\nprepregs (cured plies): "+Object.keys(PREPREGS).map(k=>"pp:"+k+"="+PREPREGS[k].name).join("; ");
   /* low thinking: same answers for data extraction, seconds instead of minutes */
   const THINK={"gemini-4-hydrogen":"LOW","gemini-3.8-flash":"LOW"};
-  const models={}; const getModel=n=>models[n]||(models[n]=AI.getGenerativeModel(ai,{model:n,systemInstruction:cfg.systemInstruction,
-    generationConfig:Object.assign({},cfg.generationConfig,THINK[n]?{thinkingConfig:{thinkingLevel:THINK[n]}}:{})}));
+  const models={};
+  const getModel=(n,search)=>{ const k=n+(search?"+s":"");
+    return models[k]||(models[k]=AI.getGenerativeModel(ai,{model:n,systemInstruction:AI_SYS_BASE+cat,
+      tools:search?[{googleSearch:{}}]:undefined,
+      generationConfig:Object.assign({temperature:0.3},THINK[n]?{thinkingConfig:{thinkingLevel:THINK[n]}}:{})})); };
   AIX={getModel,appCheck,AC}; AICHAT={i:0,hist:[]};
   return AIX;
 }
@@ -2918,8 +2943,13 @@ function renderAI(){
   log.innerHTML=AI_LOG.length?AI_LOG.map((m,li)=>
     '<div class="aim '+m.role+'">'+(m.files&&m.files.length?'<div class="aifiles">'+m.files.map(n=>'<span>'+esc(n)+'</span>').join("")+'</div>':'')+
     (m.text?'<div class="aitx">'+aiMd(m.text)+'</div>':'')+(m.model&&m.model!==AI_CFG.models[0]?'<div class="aimod">'+esc(m.model)+'</div>':'')+
-    (m.items||[]).map((it,ii)=>aiCard(it,li,ii)).join("")+'</div>').join("")
-    :'<div class="aiempty">Paste a fiber, resin or prepreg data sheet — text, a screenshot or a PDF — or ask a question. The values read appear as cards you can check, correct and add to your library.</div>';
+    (m.items||[]).map((it,ii)=>aiCard(it,li,ii)).join("")+
+    (m.actions&&m.actions.length?'<div class="aiact"><div class="aik">changes to the laminate</div><ul>'+m.actions.map(x=>'<li>'+esc(aiActText(x))+'</li>').join("")+'</ul>'+
+      (m.applied?'<span class="aiok">'+esc(m.applied)+'</span>':'<button class="btn primary" data-aiapply="'+li+'">apply to the calculator</button>')+'</div>':'')+
+    (m.sources&&m.sources.length?'<div class="aisrc">'+m.sources.map(s=>'<a href="'+esc(s.uri)+'" target="_blank" rel="noopener">'+esc(s.title||"source")+'</a>').join("")+'</div>':'')+
+    (m.sugg?'<div class="aisugg" data-sugg="'+li+'"></div>':'')+'</div>').join("")
+    :'<div class="aiempty">Ask for a material (« find an aramid for impact »), paste a data sheet — text, screenshot or PDF — or ask to change the laminate (« add two ±45 aramid plies »). Values appear as cards you can check and add to your library; laminate changes wait for your « apply ».</div>';
+  log.querySelectorAll(".aisugg").forEach(el=>{ const m=AI_LOG[+el.dataset.sugg]; if(m&&m.sugg&&!el.shadowRoot) el.attachShadow({mode:"open"}).innerHTML=m.sugg; });
   log.scrollTop=log.scrollHeight;
   document.getElementById("aiAtt").innerHTML=aiPending.map((f,i)=>'<span>'+esc(f.name||"image")+'<button data-aidel="'+i+'">✕</button></span>').join("");
   document.getElementById("aiSend").disabled=aiBusy;
@@ -2942,24 +2972,34 @@ async function aiSendMsg(){
     const tk=await within(AIX.AC.getLimitedUseToken(AIX.appCheck),25000,"appcheck-timeout");
     if(!tk||!tk.token) throw new Error("appcheck-empty");
     step("asking Gemini…");
-    const parts=[]; if(text) parts.push({text}); else parts.push({text:"Read the properties in this data sheet."});
+    const parts=[{text:"[calculator state] "+aiState()+"\n\n"+(text||"Read the properties in this data sheet.")}];
     for(const f of files) parts.push(await fileToPart(f));
     const busy=m=>/\b(500|503|429)\b|high demand|overloaded|UNAVAILABLE|RESOURCE_EXHAUSTED|try again later|Timeout has expired|AbortError/i.test(m);
     const slow=m=>/Timeout has expired|AbortError/i.test(m);
+    const toolErr=m=>/\b400\b|google_?search|grounding|tool|not supported|INVALID_ARGUMENT/i.test(m);
     const userTurn={role:"user",parts};
     let res=null, last=null;
     for(let mi=0; mi<AI_CFG.models.length && !res; mi++){
       if(mi>0) step("model busy — trying "+AI_CFG.models[mi]+"…");
-      for(let a=0; a<2 && !res; a++){
-        try{ res=await AIX.getModel(AI_CFG.models[mi]).generateContent({contents:AICHAT.hist.concat([userTurn])},{timeout:files.length?75000:45000}); AICHAT.i=mi; }
-        catch(e){ last=e; const m=String(e&&e.message||e); if(!busy(m)) throw e; if(slow(m)) break; if(a===0) await new Promise(r=>setTimeout(r,1500)); }
+      for(let a=0; a<3 && !res; a++){
+        try{ res=await AIX.getModel(AI_CFG.models[mi],AI_SEARCH).generateContent({contents:AICHAT.hist.concat([userTurn])},{timeout:files.length?90000:60000}); AICHAT.i=mi; }
+        catch(e){ last=e; const m=String(e&&e.message||e);
+          if(AI_SEARCH && toolErr(m) && !busy(m)){ AI_SEARCH=false; continue; }
+          if(!busy(m)) throw e; if(slow(m)) break; if(a===0) await new Promise(r=>setTimeout(r,1500)); }
       }
     }
     if(!res) throw last;
-    AICHAT.hist.push(userTurn,{role:"model",parts:[{text:res.response.text()}]});
+    const raw=res.response.text();
+    AICHAT.hist.push(userTurn,{role:"model",parts:[{text:raw}]});
     out.model=AI_CFG.models[AICHAT.i];
-    let j; try{ j=JSON.parse(res.response.text()); }catch(_){ j={reply:res.response.text(),items:[]}; }
+    const j=aiParse(raw);
     out.text=j.reply||""; out.items=(j.items||[]).filter(it=>it&&it.values&&Object.keys(it.values).length);
+    out.actions=(j.actions||[]).filter(x=>x&&x.op);
+    const gm=res.response.candidates&&res.response.candidates[0]&&res.response.candidates[0].groundingMetadata;
+    if(gm){
+      out.sources=(gm.groundingChunks||[]).map(c=>c.web).filter(w=>w&&w.uri).slice(0,8);
+      out.sugg=gm.searchEntryPoint&&gm.searchEntryPoint.renderedContent||"";
+    }
   }catch(e){
     const m=String(e&&e.message||e);
     console.warn("[assistant]",e);
@@ -2974,31 +3014,98 @@ async function aiSendMsg(){
   }
   aiBusy=false; renderAI();
 }
-function aiAddCard(card){
-  const li=+card.dataset.l, ii=+card.dataset.it, it=AI_LOG[li].items[ii], kind=AI_FIELDS[it.kind]?it.kind:"ply";
-  const v={}; card.querySelectorAll("input[data-f]").forEach(inp=>{ const x=parseFloat(inp.value); if(isFinite(x)) v[inp.dataset.f]=x; });
-  const name=card.querySelector(".ainame").value.trim()||("AI "+kind);
-  const ok=card.querySelector(".aiok"), id=uid8();
+function aiParse(raw){
+  const blocks=[...raw.matchAll(/```(?:json)?\s*([\s\S]*?)```/g)].map(m=>m[1]);
+  const tries=blocks.reverse().concat([raw.slice(raw.indexOf("{"),raw.lastIndexOf("}")+1)]);
+  for(const t of tries){ try{ const j=JSON.parse(t); if(j&&typeof j==="object") return j; }catch(_){} }
+  return {reply:raw.replace(/```[\s\S]*?```/g,"").trim(),items:[],actions:[]};
+}
+function aiState(){
+  const fn=p=>p.fib==="custom"?(p.pp?"pp:"+p.pp:(p.libName||"custom constants")):p.fib;
+  return "resin="+S.res+" ("+(RESINS[S.res]||{}).name+"), Vf="+(S.mode==="vf"?S.vf:"Mf "+S.mf)+
+    ", plies bottom→top: "+(S.plies.slice(0,40).map((p,i)=>(i+1)+") "+p.a+"° "+fn(p)+" "+p.type+" "+(+p.t).toFixed(3)+"mm").join("; ")||"none");
+}
+/* adds an AI item to the library, returns the key to use in a ply / resin select */
+function aiAddItem(it,v,name){
+  const kind=AI_FIELDS[it.kind]?it.kind:"ply", id=uid8();
+  name=name||it.name||("AI "+kind);
   if(kind==="fiber"){
-    if(!(v.EL>0)){ ok.textContent="E L is needed"; return; }
-    const iso = (v.rho||0)>2000 && v.EL<110;                       // glass, basalt, quartz
-    const tpl = iso ? FIBERS.glass_e_rov : (v.rho||1800)<1600 ? FIBERS.aramid : v.EL>330 ? FIBERS.carbon_hm : v.EL>260 ? FIBERS.carbon_im : FIBERS.carbon_hr;
+    if(!(v.EL>0)) throw new Error("E L is needed");
+    const iso=(v.rho||0)>2000 && v.EL<110;
+    const tpl=iso?FIBERS.glass_e_rov:(v.rho||1800)<1600?FIBERS.aramid:v.EL>330?FIBERS.carbon_hm:v.EL>260?FIBERS.carbon_im:FIBERS.carbon_hr;
     const d=k=>v[k]!=null?v[k]:tpl[k];
     LIB.fibers[id]={name,form:"",col:iso?"#B2B9BE":tpl===FIBERS.aramid?"#C8A22B":"#16181C",
       EL:v.EL, ET:iso?v.EL:d("ET"), G:v.G!=null?v.G:(iso?v.EL/2.44:tpl.G), G23:d("G23"), nu:d("nu"), rho:d("rho"),
       st:d("st"), sc:v.sc!=null?v.sc:Math.round((iso?0.55:0.38)*(v.st||tpl.st)), a1:d("a1"), a2:iso&&v.a2==null?d("a1"):d("a2")};
-  } else if(kind==="resin"){
-    if(!(v.E>0)){ ok.textContent="E is needed"; return; }
-    LIB.resins[id]={name,E:v.E,nu:v.nu!=null?v.nu:0.37,rho:v.rho||1180,st:v.st||70,sc:v.sc||Math.round(1.5*(v.st||70)),a:v.a!=null?v.a:65};
-  } else {
-    if(!(v.E1>0&&v.E2>0)){ ok.textContent="E₁ and E₂ are needed"; return; }
-    const man=Object.assign({},MAN_DEFAULT);
-    AI_FIELDS.ply.forEach(([k])=>{ if(v[k]!=null) man[k]=v[k]; });
-    if(v.G23==null) man.G23=+(man.E2/2.9).toFixed(2);
-    LIB.plies[id]={name,man};
+    return {kind,key:"u_"+id};
   }
+  if(kind==="resin"){
+    if(!(v.E>0)) throw new Error("E is needed");
+    LIB.resins[id]={name,E:v.E,nu:v.nu!=null?v.nu:0.37,rho:v.rho||1180,st:v.st||70,sc:v.sc||Math.round(1.5*(v.st||70)),a:v.a!=null?v.a:65};
+    return {kind,key:"u_"+id};
+  }
+  if(!(v.E1>0&&v.E2>0)) throw new Error("E₁ and E₂ are needed");
+  const man=Object.assign({},MAN_DEFAULT);
+  AI_FIELDS.ply.forEach(([k])=>{ if(v[k]!=null) man[k]=v[k]; });
+  if(v.G23==null) man.G23=+(man.E2/2.9).toFixed(2);
+  LIB.plies[id]={name,man};
+  return {kind,key:"ply:"+id,cpt:v.cpt};
+}
+function aiCardValues(li,ii){
+  const card=document.querySelector('.aicard[data-l="'+li+'"][data-it="'+ii+'"]'), it=AI_LOG[li].items[ii];
+  if(!card) return {v:Object.assign({},it.values),name:it.name};
+  const ins=[...card.querySelectorAll("input[data-f]")]; if(!ins.length) return {v:Object.assign({},it.values),name:it.name};
+  const v={}; ins.forEach(inp=>{ const x=parseFloat(inp.value); if(isFinite(x)) v[inp.dataset.f]=x; });
+  const nm=card.querySelector(".ainame"); return {v,name:(nm&&nm.value||"").trim()||it.name};
+}
+function aiActText(x){
+  const f=k=>{ if(!k) return "?"; k=String(k);
+    if(k.indexOf("item:")===0) return "new item "+(+k.slice(5)+1);
+    if(k.indexOf("pp:")===0) return (PREPREGS[k.slice(3)]||{name:k}).name;
+    return (FIBERS[k]||RESINS[k]||{name:k}).name; };
+  if(x.op==="add_ply") return "add "+(x.count>1?x.count+" × ":"")+(x.angle||0)+"° "+f(x.fiber)+(x.type?" ("+x.type+")":"");
+  if(x.op==="set_stack") return "replace the stack: "+(x.plies||[]).map(p=>(p.angle||0)+"°").join("/")+" — "+[...new Set((x.plies||[]).map(p=>f(p.fiber)))].join(", ");
+  if(x.op==="remove_ply") return "remove ply "+x.index;
+  if(x.op==="set_resin") return "resin: "+f(x.resin);
+  if(x.op==="set_vf") return "Vf = "+Math.round((+x.vf||0)*100)+" %";
+  return x.op;
+}
+function aiApply(li){
+  const m=AI_LOG[li], made={}, notes=[];
+  const resolve=k=>{ k=String(k||"");
+    if(k.indexOf("item:")===0){ const ii=+k.slice(5);
+      if(!made[ii]){ const it=m.items[ii]; if(!it) throw new Error("item "+ii+" missing"); const cv=aiCardValues(li,ii); made[ii]=aiAddItem(it,cv.v,cv.name); applyLibrary(); }
+      return made[ii]; }
+    if(k.indexOf("pp:")===0 && PREPREGS[k.slice(3)]) return {kind:"pp",key:k};
+    if(FIBERS[k]) return {kind:"fiber",key:k};
+    if(RESINS[k]) return {kind:"resin",key:k};
+    throw new Error("unknown material "+k); };
+  const mkPly=(p)=>{
+    const r=resolve(p.fiber), o={a:Math.max(-90,Math.min(90,Math.round(+p.angle||0))),on:true,gsm:300};
+    if(r.kind==="pp"){ const k=r.key.slice(3), pp=PREPREGS[k]; Object.assign(o,{fib:"custom",pp:k,libName:pp.name,man:Object.assign({},MAN_DEFAULT,ppMan(k)),type:"ud",t:pp.cpt,gsm:pp.faw}); }
+    else if(r.key.indexOf("ply:")===0){ const id=r.key.slice(4), lp=LIB.plies[id]; Object.assign(o,{fib:"custom",libPly:id,libName:lp.name,man:Object.assign({},MAN_DEFAULT,lp.man),type:"ud",t:+p.t||r.cpt||0.25}); }
+    else { const fb=FIBERS[r.key]; o.fib=r.key; o.type=fb.form==="mat"?"mat":(p.type==="fabric"?"fabric":p.type==="mat"&&fb.form==="mat"?"mat":"ud"); o.t=+p.t>0?+p.t:(o.type==="fabric"?0.3:o.type==="mat"?0.8:0.25); }
+    if(+p.t>0) o.t=+p.t;
+    return o; };
+  const snap={plies:S.plies.map(p=>Object.assign({},p)),res:S.res,mode:S.mode,vf:S.vf};
+  try{
+    for(const x of m.actions){
+      if(x.op==="add_ply"){ const n=Math.max(1,Math.min(50,Math.round(+x.count||1))); for(let i=0;i<n;i++) S.plies.push(mkPly(x)); }
+      else if(x.op==="set_stack"&&Array.isArray(x.plies)&&x.plies.length){ S.plies=x.plies.slice(0,100).map(mkPly); }
+      else if(x.op==="remove_ply"){ const i=Math.round(+x.index)-1; if(i>=0&&i<S.plies.length&&S.plies.length>1) S.plies.splice(i,1); }
+      else if(x.op==="set_resin"){ const r=resolve(x.resin); if(RESINS[r.key]){ S.res=r.key; } }
+      else if(x.op==="set_vf"){ const v=+x.vf; if(v>0.05&&v<0.85){ S.mode="vf"; S.vf=v; } }
+    }
+    m.applied="applied";
+  }catch(e){ Object.assign(S,snap); m.applied="not applied: "+e.message; }
+  persist(); applyLibrary(); fillResinSelect(); if(typeof fillResinInputs==="function") fillResinInputs(); renderLayers(); update(); renderAI();
+}
+function aiAddCard(card){
+  const li=+card.dataset.l, ii=+card.dataset.it, it=AI_LOG[li].items[ii], ok=card.querySelector(".aiok");
+  const cv=aiCardValues(li,ii);
+  try{ aiAddItem(it,cv.v,cv.name||("AI "+it.kind)); }catch(e){ ok.textContent=e.message; return; }
   applyLibrary(); persist();
-  ok.textContent="added — now in the "+(kind==="resin"?"resin":"fiber")+" list";
+  ok.textContent="added — now in the "+(it.kind==="resin"?"resin":"fiber")+" list";
   card.querySelector("[data-aiadd]").disabled=true;
 }
 (function(){
@@ -3013,7 +3120,8 @@ function aiAddCard(card){
   pane.addEventListener("drop",e=>{ e.preventDefault(); pane.classList.remove("drop"); take([...e.dataTransfer.files]); });
   document.getElementById("aiFile").onchange=e=>{ take([...e.target.files]); e.target.value=""; };
   document.getElementById("aiAtt").addEventListener("click",e=>{ const b=e.target.closest("[data-aidel]"); if(b){ aiPending.splice(+b.dataset.aidel,1); renderAI(); } });
-  document.getElementById("aiLog").addEventListener("click",e=>{ const b=e.target.closest("[data-aiadd]"); if(b) aiAddCard(b.closest(".aicard")); });
+  document.getElementById("aiLog").addEventListener("click",e=>{ const b=e.target.closest("[data-aiadd]"); if(b) aiAddCard(b.closest(".aicard"));
+    const ap=e.target.closest("[data-aiapply]"); if(ap) aiApply(+ap.dataset.aiapply); });
   document.getElementById("aiNew").onclick=()=>{ AI_LOG.length=0; aiPending=[]; AICHAT={i:0,hist:[]}; renderAI(); };
   renderAI();
 })();
