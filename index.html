@@ -2886,7 +2886,10 @@ async function aiInit(){
   const appCheck=AC.initializeAppCheck(app,{provider:new AC.ReCaptchaEnterpriseProvider(AI_CFG.recaptchaKey),isTokenAutoRefreshEnabled:true});
   const ai=AI.getAI(app,{backend:new AI.GoogleAIBackend(),useLimitedUseAppCheckTokens:true});
   const cfg={systemInstruction:AI_SYS,generationConfig:{responseMimeType:"application/json",responseSchema:aiSchema(AI.Schema),temperature:0.2}};
-  const models={}; const getModel=n=>models[n]||(models[n]=AI.getGenerativeModel(ai,Object.assign({model:n},cfg)));
+  /* low thinking: same answers for data extraction, seconds instead of minutes */
+  const THINK={"gemini-4-hydrogen":"LOW","gemini-3.8-flash":"LOW"};
+  const models={}; const getModel=n=>models[n]||(models[n]=AI.getGenerativeModel(ai,{model:n,systemInstruction:cfg.systemInstruction,
+    generationConfig:Object.assign({},cfg.generationConfig,THINK[n]?{thinkingConfig:{thinkingLevel:THINK[n]}}:{})}));
   AIX={getModel,appCheck,AC}; AICHAT={i:0,hist:[]};
   return AIX;
 }
@@ -2941,14 +2944,15 @@ async function aiSendMsg(){
     step("asking Gemini…");
     const parts=[]; if(text) parts.push({text}); else parts.push({text:"Read the properties in this data sheet."});
     for(const f of files) parts.push(await fileToPart(f));
-    const busy=m=>/\b(500|503|429)\b|high demand|overloaded|UNAVAILABLE|RESOURCE_EXHAUSTED|try again later/i.test(m);
+    const busy=m=>/\b(500|503|429)\b|high demand|overloaded|UNAVAILABLE|RESOURCE_EXHAUSTED|try again later|Timeout has expired|AbortError/i.test(m);
+    const slow=m=>/Timeout has expired|AbortError/i.test(m);
     const userTurn={role:"user",parts};
     let res=null, last=null;
     for(let mi=0; mi<AI_CFG.models.length && !res; mi++){
       if(mi>0) step("model busy — trying "+AI_CFG.models[mi]+"…");
       for(let a=0; a<2 && !res; a++){
-        try{ res=await AIX.getModel(AI_CFG.models[mi]).generateContent({contents:AICHAT.hist.concat([userTurn])},{timeout:90000}); AICHAT.i=mi; }
-        catch(e){ last=e; if(!busy(String(e&&e.message||e))) throw e; if(a===0) await new Promise(r=>setTimeout(r,1500)); }
+        try{ res=await AIX.getModel(AI_CFG.models[mi]).generateContent({contents:AICHAT.hist.concat([userTurn])},{timeout:files.length?75000:45000}); AICHAT.i=mi; }
+        catch(e){ last=e; const m=String(e&&e.message||e); if(!busy(m)) throw e; if(slow(m)) break; if(a===0) await new Promise(r=>setTimeout(r,1500)); }
       }
     }
     if(!res) throw last;
