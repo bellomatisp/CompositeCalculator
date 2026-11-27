@@ -2285,20 +2285,29 @@ layersEl.addEventListener("change",e=>{
   }
   renderLayers(); update();
 });
+/* copy of a ply's material: custom constants and library link, own object per ply */
+function plyMat(p){
+  const o={fib:p.fib};
+  if(p.fib==="custom"){
+    o.man=Object.assign({},MAN_DEFAULT,p.man||{});
+    if(p.libPly){ o.libPly=p.libPly; o.libName=p.libName; }
+  }
+  return o;
+}
 function addLayer(){
   const last=S.plies[S.plies.length-1]||{a:0,t:0.25,type:"ud",fib:"carbon_hs"};
-  S.plies.push({a:0,t:last.t,type:last.type,fib:last.fib,gsm:last.gsm||GSM_DEFAULT[last.type]||300,on:true});
+  S.plies.push({a:0,t:last.t,type:last.type,...plyMat(last),gsm:last.gsm||GSM_DEFAULT[last.type]||300,on:true});
   renderLayers(); update();
 }
 document.getElementById("addPly").addEventListener("click",addLayer);
 document.getElementById("mirror").addEventListener("click",()=>{
-  S.plies=S.plies.concat(S.plies.slice().reverse().map(p=>({...p})));
+  S.plies=S.plies.concat(S.plies.slice().reverse().map(p=>({...p,...plyMat(p)})));
   renderLayers(); update();
 });
 document.querySelectorAll(".preset").forEach(b=>b.addEventListener("click",()=>{
   const fab=b.dataset.fabric==="1";
-  const fib=(S.plies[0]&&S.plies[0].fib)||"carbon_hs";
-  S.plies=b.dataset.p.split(",").map(a=>({a:+a,t:fab?0.35:0.25,type:fab?"fabric":"ud",fib,
+  const src=S.plies[0]||{fib:"carbon_hs"};
+  S.plies=b.dataset.p.split(",").map(a=>({a:+a,t:fab?0.35:0.25,type:fab?"fabric":"ud",...plyMat(src),
     gsm:fab?GSM_DEFAULT.fabric:GSM_DEFAULT.ud,on:true}));
   S.sel=-1; renderLayers(); update();
 }));
