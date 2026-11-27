@@ -227,6 +227,7 @@ table.res td.u{color:var(--ink-3);font-size:11px;width:1%;white-space:nowrap;pad
 .pf-h{padding-top:0}.pf-h .pf-n{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
 .aipanel .aibody{flex:1;display:flex;flex-direction:column;min-height:0}
 .ailog{flex:1;overflow:auto;padding:14px 18px}
+.aimod{font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-top:3px}
 .aiempty{font-size:12.5px;color:var(--ink-3);line-height:1.5}
 .aim{margin:0 0 12px}.aim.user{text-align:right}
 .aim .aitx{display:inline-block;max-width:92%;text-align:left;font-size:13px;line-height:1.45;padding:8px 11px;border-radius:12px;background:var(--soft)}
@@ -2838,7 +2839,7 @@ initFirebase();
    =================================================================== */
 const AI_CFG={
   sdk:"13.2.0",
-  model:"gemini-3.8-flash",
+  models:["gemini-3.8-flash","gemini-4-hydrogen","gemini-3.5-flash-lite"],   // tried in order when one is overloaded (all free tier)
   recaptchaKey:"6Lc17zQuAAAAAOQSMmiOLZ_PTrak8mhYc2vgS8yf"   // App Check, reCAPTCHA Enterprise (Fraud Defense) site key — public
 };
 let AIX=null, AICHAT=null, aiBusy=false, aiPending=[];
@@ -2884,9 +2885,9 @@ async function aiInit(){
   const app=A.initializeApp(FIREBASE_CONFIG,"laminae-ai");
   const appCheck=AC.initializeAppCheck(app,{provider:new AC.ReCaptchaEnterpriseProvider(AI_CFG.recaptchaKey),isTokenAutoRefreshEnabled:true});
   const ai=AI.getAI(app,{backend:new AI.GoogleAIBackend(),useLimitedUseAppCheckTokens:true});
-  const model=AI.getGenerativeModel(ai,{model:AI_CFG.model,systemInstruction:AI_SYS,
-    generationConfig:{responseMimeType:"application/json",responseSchema:aiSchema(AI.Schema),temperature:0.2}});
-  AIX={model,appCheck,AC}; AICHAT=model.startChat({history:[]});
+  const cfg={systemInstruction:AI_SYS,generationConfig:{responseMimeType:"application/json",responseSchema:aiSchema(AI.Schema),temperature:0.2}};
+  const models={}; const getModel=n=>models[n]||(models[n]=AI.getGenerativeModel(ai,Object.assign({model:n},cfg)));
+  AIX={getModel,appCheck,AC}; AICHAT={i:0,chat:getModel(AI_CFG.models[0]).startChat({history:[]})};
   return AIX;
 }
 const fileToPart=f=>new Promise((res,rej)=>{const r=new FileReader();
@@ -2913,7 +2914,7 @@ function renderAI(){
   document.getElementById("aiForm").classList.toggle("off",!!gate);
   log.innerHTML=AI_LOG.length?AI_LOG.map((m,li)=>
     '<div class="aim '+m.role+'">'+(m.files&&m.files.length?'<div class="aifiles">'+m.files.map(n=>'<span>'+esc(n)+'</span>').join("")+'</div>':'')+
-    (m.text?'<div class="aitx">'+aiMd(m.text)+'</div>':'')+
+    (m.text?'<div class="aitx">'+aiMd(m.text)+'</div>':'')+(m.model&&m.model!==AI_CFG.models[0]?'<div class="aimod">'+esc(m.model)+'</div>':'')+
     (m.items||[]).map((it,ii)=>aiCard(it,li,ii)).join("")+'</div>').join("")
     :'<div class="aiempty">Paste a fiber, resin or prepreg data sheet — text, a screenshot or a PDF — or ask a question. The values read appear as cards you can check, correct and add to your library.</div>';
   log.scrollTop=log.scrollHeight;
@@ -2940,7 +2941,21 @@ async function aiSendMsg(){
     step("asking Gemini…");
     const parts=[]; if(text) parts.push({text}); else parts.push({text:"Read the properties in this data sheet."});
     for(const f of files) parts.push(await fileToPart(f));
-    const res=await AICHAT.sendMessage(parts,{timeout:90000});
+    const busy=m=>/\b(500|503|429)\b|high demand|overloaded|UNAVAILABLE|RESOURCE_EXHAUSTED|try again later/i.test(m);
+    let res=null, last=null;
+    for(let mi=AICHAT.i; mi<AI_CFG.models.length && !res; mi++){
+      if(mi!==AICHAT.i){
+        const hist=await AICHAT.chat.getHistory();
+        AICHAT={i:mi,chat:AIX.getModel(AI_CFG.models[mi]).startChat({history:hist})};
+        step("model busy — trying "+AI_CFG.models[mi]+"…");
+      }
+      for(let a=0; a<2 && !res; a++){
+        try{ res=await AICHAT.chat.sendMessage(parts,{timeout:90000}); }
+        catch(e){ last=e; if(!busy(String(e&&e.message||e))) throw e; if(a===0) await new Promise(r=>setTimeout(r,1500)); }
+      }
+    }
+    if(!res) throw last;
+    out.model=AI_CFG.models[AICHAT.i];
     let j; try{ j=JSON.parse(res.response.text()); }catch(_){ j={reply:res.response.text(),items:[]}; }
     out.text=j.reply||""; out.items=(j.items||[]).filter(it=>it&&it.values&&Object.keys(it.values).length);
   }catch(e){
@@ -2949,6 +2964,7 @@ async function aiSendMsg(){
     out.text = m==="not-configured" ? "The assistant is not enabled on this site yet."
       : m==="sdk-timeout" ? "Could not load the Firebase AI SDK (network or blocker)."
       : /appcheck-timeout|appcheck-empty/.test(m) ? "App Check did not deliver a token (reCAPTCHA). Disable ad/tracker blockers for this site and reload; if it persists the reCAPTCHA key is not active yet."
+      : /high demand|overloaded|\b(500|503)\b/i.test(m) ? "All Gemini models are busy right now. Try again in a minute."
       : /Timeout has expired|AbortError/i.test(m) ? "Gemini did not answer in time. Try again, or with a shorter text / smaller image."
       : /app.?check|403|attest/i.test(m) ? "Request refused by App Check. Reload the page and try again."
       : /quota|429|RESOURCE_EXHAUSTED/i.test(m) ? "Free quota reached for now — try again in a minute."
@@ -2996,7 +3012,7 @@ function aiAddCard(card){
   document.getElementById("aiFile").onchange=e=>{ take([...e.target.files]); e.target.value=""; };
   document.getElementById("aiAtt").addEventListener("click",e=>{ const b=e.target.closest("[data-aidel]"); if(b){ aiPending.splice(+b.dataset.aidel,1); renderAI(); } });
   document.getElementById("aiLog").addEventListener("click",e=>{ const b=e.target.closest("[data-aiadd]"); if(b) aiAddCard(b.closest(".aicard")); });
-  document.getElementById("aiNew").onclick=()=>{ AI_LOG.length=0; aiPending=[]; if(AIX) AICHAT=AIX.model.startChat({history:[]}); renderAI(); };
+  document.getElementById("aiNew").onclick=()=>{ AI_LOG.length=0; aiPending=[]; if(AIX) AICHAT={i:0,chat:AIX.getModel(AI_CFG.models[0]).startChat({history:[]})}; renderAI(); };
   renderAI();
 })();
 </script>
