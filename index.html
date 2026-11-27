@@ -2839,7 +2839,7 @@ initFirebase();
    =================================================================== */
 const AI_CFG={
   sdk:"13.2.0",
-  models:["gemini-3.8-flash","gemini-4-hydrogen","gemini-3.5-flash-lite"],   // tried in order when one is overloaded (all free tier)
+  models:["gemini-4-hydrogen","gemini-3.8-flash","gemini-3.5-flash-lite"],   // tried in order when one is overloaded (all free tier)
   recaptchaKey:"6Lc17zQuAAAAAOQSMmiOLZ_PTrak8mhYc2vgS8yf"   // App Check, reCAPTCHA Enterprise (Fraud Defense) site key — public
 };
 let AIX=null, AICHAT=null, aiBusy=false, aiPending=[];
@@ -2887,7 +2887,7 @@ async function aiInit(){
   const ai=AI.getAI(app,{backend:new AI.GoogleAIBackend(),useLimitedUseAppCheckTokens:true});
   const cfg={systemInstruction:AI_SYS,generationConfig:{responseMimeType:"application/json",responseSchema:aiSchema(AI.Schema),temperature:0.2}};
   const models={}; const getModel=n=>models[n]||(models[n]=AI.getGenerativeModel(ai,Object.assign({model:n},cfg)));
-  AIX={getModel,appCheck,AC}; AICHAT={i:0,chat:getModel(AI_CFG.models[0]).startChat({history:[]})};
+  AIX={getModel,appCheck,AC}; AICHAT={i:0,hist:[]};
   return AIX;
 }
 const fileToPart=f=>new Promise((res,rej)=>{const r=new FileReader();
@@ -2942,19 +2942,17 @@ async function aiSendMsg(){
     const parts=[]; if(text) parts.push({text}); else parts.push({text:"Read the properties in this data sheet."});
     for(const f of files) parts.push(await fileToPart(f));
     const busy=m=>/\b(500|503|429)\b|high demand|overloaded|UNAVAILABLE|RESOURCE_EXHAUSTED|try again later/i.test(m);
+    const userTurn={role:"user",parts};
     let res=null, last=null;
     for(let mi=AICHAT.i; mi<AI_CFG.models.length && !res; mi++){
-      if(mi!==AICHAT.i){
-        const hist=await AICHAT.chat.getHistory();
-        AICHAT={i:mi,chat:AIX.getModel(AI_CFG.models[mi]).startChat({history:hist})};
-        step("model busy — trying "+AI_CFG.models[mi]+"…");
-      }
+      if(mi!==AICHAT.i) step("model busy — trying "+AI_CFG.models[mi]+"…");
       for(let a=0; a<2 && !res; a++){
-        try{ res=await AICHAT.chat.sendMessage(parts,{timeout:90000}); }
+        try{ res=await AIX.getModel(AI_CFG.models[mi]).generateContent({contents:AICHAT.hist.concat([userTurn])},{timeout:90000}); AICHAT.i=mi; }
         catch(e){ last=e; if(!busy(String(e&&e.message||e))) throw e; if(a===0) await new Promise(r=>setTimeout(r,1500)); }
       }
     }
     if(!res) throw last;
+    AICHAT.hist.push(userTurn,{role:"model",parts:[{text:res.response.text()}]});
     out.model=AI_CFG.models[AICHAT.i];
     let j; try{ j=JSON.parse(res.response.text()); }catch(_){ j={reply:res.response.text(),items:[]}; }
     out.text=j.reply||""; out.items=(j.items||[]).filter(it=>it&&it.values&&Object.keys(it.values).length);
@@ -3012,7 +3010,7 @@ function aiAddCard(card){
   document.getElementById("aiFile").onchange=e=>{ take([...e.target.files]); e.target.value=""; };
   document.getElementById("aiAtt").addEventListener("click",e=>{ const b=e.target.closest("[data-aidel]"); if(b){ aiPending.splice(+b.dataset.aidel,1); renderAI(); } });
   document.getElementById("aiLog").addEventListener("click",e=>{ const b=e.target.closest("[data-aiadd]"); if(b) aiAddCard(b.closest(".aicard")); });
-  document.getElementById("aiNew").onclick=()=>{ AI_LOG.length=0; aiPending=[]; if(AIX) AICHAT={i:0,chat:AIX.getModel(AI_CFG.models[0]).startChat({history:[]})}; renderAI(); };
+  document.getElementById("aiNew").onclick=()=>{ AI_LOG.length=0; aiPending=[]; AICHAT={i:0,hist:[]}; renderAI(); };
   renderAI();
 })();
 </script>
