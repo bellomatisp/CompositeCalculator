@@ -2944,8 +2944,8 @@ async function aiSendMsg(){
     const busy=m=>/\b(500|503|429)\b|high demand|overloaded|UNAVAILABLE|RESOURCE_EXHAUSTED|try again later/i.test(m);
     const userTurn={role:"user",parts};
     let res=null, last=null;
-    for(let mi=AICHAT.i; mi<AI_CFG.models.length && !res; mi++){
-      if(mi!==AICHAT.i) step("model busy — trying "+AI_CFG.models[mi]+"…");
+    for(let mi=0; mi<AI_CFG.models.length && !res; mi++){
+      if(mi>0) step("model busy — trying "+AI_CFG.models[mi]+"…");
       for(let a=0; a<2 && !res; a++){
         try{ res=await AIX.getModel(AI_CFG.models[mi]).generateContent({contents:AICHAT.hist.concat([userTurn])},{timeout:90000}); AICHAT.i=mi; }
         catch(e){ last=e; if(!busy(String(e&&e.message||e))) throw e; if(a===0) await new Promise(r=>setTimeout(r,1500)); }
