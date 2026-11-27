@@ -2844,7 +2844,7 @@ initFirebase();
    =================================================================== */
 const AI_CFG={
   sdk:"13.2.0",
-  models:["gemini-4-hydrogen","gemini-3.8-flash","gemini-3.5-flash-lite"],   // tried in order when one is overloaded (all free tier)
+  models:["gemini-3.5-flash-lite","gemini-4-hydrogen","gemini-3.8-flash"],   // tried in order when one is overloaded (all free tier)
   recaptchaKey:"6Lc17zQuAAAAAOQSMmiOLZ_PTrak8mhYc2vgS8yf"   // App Check, reCAPTCHA Enterprise (Fraud Defense) site key — public
 };
 let AIX=null, AICHAT=null, aiBusy=false, aiPending=[], AI_SEARCH=true;
@@ -2857,7 +2857,8 @@ const AI_FIELDS={
 };
 const AI_SYS_BASE=`You are the material assistant of Laminae, a composite laminate calculator (micromechanics + classical laminate theory).
 You help the user research fibers, resins and prepregs, read product data sheets (text, images, PDF) and build the laminate.
-You may use Google Search to find manufacturer data sheets. Prefer manufacturer values; say where each value comes from.
+When Google Search is available use it to find manufacturer data sheets. Otherwise give values you know from manufacturer data sheets, name the product and data sheet, and put "from memory, check the data sheet" in the item note.
+To propose solutions, compare 2-3 candidate materials with their key numbers and why they fit.
 Answer briefly in the user's language.
 
 ALWAYS end your answer with ONE fenced block \`\`\`json ... \`\`\` holding:
@@ -2976,7 +2977,7 @@ async function aiSendMsg(){
     for(const f of files) parts.push(await fileToPart(f));
     const busy=m=>/\b(500|503|429)\b|high demand|overloaded|UNAVAILABLE|RESOURCE_EXHAUSTED|try again later|Timeout has expired|AbortError/i.test(m);
     const slow=m=>/Timeout has expired|AbortError/i.test(m);
-    const toolErr=m=>/\b400\b|google_?search|grounding|tool|not supported|INVALID_ARGUMENT/i.test(m);
+    const toolErr=m=>/\b(400|429)\b|quota|RESOURCE_EXHAUSTED|google_?search|grounding|tool|not supported|INVALID_ARGUMENT/i.test(m);
     const userTurn={role:"user",parts};
     let res=null, last=null;
     for(let mi=0; mi<AI_CFG.models.length && !res; mi++){
@@ -2984,7 +2985,7 @@ async function aiSendMsg(){
       for(let a=0; a<3 && !res; a++){
         try{ res=await AIX.getModel(AI_CFG.models[mi],AI_SEARCH).generateContent({contents:AICHAT.hist.concat([userTurn])},{timeout:files.length?90000:60000}); AICHAT.i=mi; }
         catch(e){ last=e; const m=String(e&&e.message||e);
-          if(AI_SEARCH && toolErr(m) && !busy(m)){ AI_SEARCH=false; continue; }
+          if(AI_SEARCH && toolErr(m)){ AI_SEARCH=false; a--; continue; }   // Google Search grounding not in the free quota → answer without it
           if(!busy(m)) throw e; if(slow(m)) break; if(a===0) await new Promise(r=>setTimeout(r,1500)); }
       }
     }
