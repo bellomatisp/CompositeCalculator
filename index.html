@@ -225,6 +225,32 @@ table.res td.u{color:var(--ink-3);font-size:11px;width:1%;white-space:nowrap;pad
 .pf-c b{display:block;font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums}
 .pf-c span{display:block;font-family:var(--mono);font-size:10.5px;line-height:1.35;color:var(--ink-3);overflow-wrap:anywhere}
 .pf-h{padding-top:0}.pf-h .pf-n{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.aipanel .aibody{flex:1;display:flex;flex-direction:column;min-height:0}
+.ailog{flex:1;overflow:auto;padding:14px 18px}
+.aiempty{font-size:12.5px;color:var(--ink-3);line-height:1.5}
+.aim{margin:0 0 12px}.aim.user{text-align:right}
+.aim .aitx{display:inline-block;max-width:92%;text-align:left;font-size:13px;line-height:1.45;padding:8px 11px;border-radius:12px;background:var(--soft)}
+.aim.user .aitx{background:var(--ink);color:#fff}
+.aifiles{display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap;margin-bottom:4px}
+.aifiles span,.aiatt span{font-family:var(--mono);font-size:10.5px;background:var(--soft);border-radius:99px;padding:3px 9px}
+.aiatt{display:flex;gap:5px;flex-wrap:wrap}.aiatt:empty{display:none}.aiatt span{display:inline-flex;gap:5px;align-items:center}
+.aiatt button{border:none;background:none;cursor:pointer;color:var(--ink-3);padding:0}
+.aicard{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:8px;text-align:left}
+.aich{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.aik{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
+.ainame{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:5px 8px;font:inherit;font-size:13px}
+.aigrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:6px}
+.aigrid label{display:flex;flex-direction:column;gap:2px;font-size:11px;color:var(--ink-2)}
+.aigrid label i{font-style:normal;color:var(--ink-3);font-size:10px}
+.aigrid input{border:1px solid var(--line);border-radius:7px;padding:4px 6px;font-family:var(--mono);font-size:12px;width:100%}
+.aigrid input:placeholder-shown{background:var(--soft)}
+.ainote{font-size:11px;color:var(--ink-3);margin:8px 0 0;line-height:1.4}
+.aiok{font-size:11.5px;color:var(--ink-3);margin-left:8px;align-self:center}
+.aiform{border-top:1px solid var(--line);padding:10px 18px 14px;display:flex;flex-direction:column;gap:8px}
+.aiform.off{opacity:.45;pointer-events:none}
+.aiform textarea{resize:vertical;border:1px solid var(--line);border-radius:12px;padding:9px 11px;font:inherit;font-size:13px;min-height:62px}
+.aigate{margin:0 18px;font-size:12px;color:var(--ink-2);background:var(--soft);border-radius:10px;padding:8px 11px}
+.aipanel.drop{outline:2px dashed var(--ink-3);outline-offset:-8px}
 .ppsrc{font-family:var(--mono);font-size:10.5px;line-height:1.4;color:var(--ink-3);margin:6px 0 0}
 .note{border-left:2px solid var(--soft-2);padding:7px 0 7px 11px;font-size:12px;color:var(--ink-3);margin:12px 0 0}
 .note.warn{border-left-color:var(--ink);color:var(--ink-2)}
@@ -446,6 +472,10 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
     <svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V4M16 19v-7M4 19h17"/></svg>
     <span class="tip">properties</span>
   </button>
+  <button id="r-ai" aria-expanded="false" data-p="ai">
+    <svg viewBox="0 0 24 24"><path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>
+    <span class="tip">assistant</span>
+  </button>
 </nav>
 
 <div class="chips" id="chips"></div>
@@ -555,6 +585,21 @@ pre.out{font-family:var(--mono);font-size:11px;line-height:1.6;background:var(--
     <p class="mini" id="expHint"></p>
     <div class="btnrow" style="margin-bottom:11px"><button class="btn primary" id="copyBtn">copy to clipboard</button><span class="copied" id="copied"></span></div>
     <pre class="out" id="out"></pre>
+    </div>
+  </div>
+</section>
+
+<section class="panel wide aipanel" id="p-ai" hidden>
+  <div class="p-head"><h2>material assistant</h2><button class="linkbtn" id="aiNew" style="margin-left:auto;margin-right:10px">new chat</button><button class="close" data-close>✕</button></div>
+  <div class="aibody">
+    <div class="ailog" id="aiLog"></div>
+    <p class="aigate" id="aiGate" hidden></p>
+    <div class="aiform" id="aiForm">
+      <div class="aiatt" id="aiAtt"></div>
+      <textarea id="aiIn" rows="3" placeholder="Paste a data sheet, a screenshot (Ctrl+V) or ask a question…"></textarea>
+      <div class="btnrow"><label class="btn" style="cursor:pointer">image / PDF<input type="file" id="aiFile" accept="image/*,application/pdf" multiple hidden></label>
+        <span class="mini" style="margin:0 auto 0 4px">Gemini · values to check against the sheet</span>
+        <button class="btn primary" id="aiSend">send</button></div>
     </div>
   </div>
 </section>
@@ -2249,7 +2294,7 @@ function update(rebuild=true){
 }
 function openPanel(name){
   S.open=(S.open===name)?null:name;
-  ["matrix","layers","props"].forEach(k=>{
+  ["matrix","layers","props","ai"].forEach(k=>{
     document.getElementById("p-"+k).hidden=S.open!==k;
     document.getElementById("r-"+k).setAttribute("aria-expanded",String(S.open===k));
   });
@@ -2632,7 +2677,7 @@ async function initFirebase(){
     await loadScript(base+"firebase-firestore-compat.js");
     firebase.initializeApp(FIREBASE_CONFIG);
     AUTH=firebase.auth(); DB=firebase.firestore();
-    AUTH.onAuthStateChanged(u=>{ USER=u; document.getElementById("mark").classList.toggle("signed",!!u); renderAcct(); if(u) pullCloud(); else { syncNote="saved in this browser"; renderAcctNote(); } });
+    AUTH.onAuthStateChanged(u=>{ USER=u; if(typeof renderAI==='function') renderAI(); document.getElementById("mark").classList.toggle("signed",!!u); renderAcct(); if(u) pullCloud(); else { syncNote="saved in this browser"; renderAcctNote(); } });
   }catch(e){ AUTH=null; renderAcct("Account service unreachable — library kept in this browser."); }
 }
 const AUTH_ERR={
@@ -2782,6 +2827,167 @@ applyLibrary();
 renderAcct();
 initFirebase();
 
+
+/* ===================================================================
+   MATERIAL ASSISTANT — Firebase AI Logic (Gemini Developer API).
+   Paste or drop a datasheet (text, image, PDF), chat about it; the
+   model returns the properties it read as structured data, shown as
+   editable cards that go straight into the library.
+   Protected by Firebase App Check (reCAPTCHA v3) and limited to
+   signed-in users.
+   =================================================================== */
+const AI_CFG={
+  sdk:"13.2.0",
+  model:"gemini-3.8-flash",
+  recaptchaV3Key:""            // App Check site key; empty = assistant disabled
+};
+let AIX=null, AICHAT=null, aiBusy=false, aiPending=[];
+const AI_LOG=[];               // {role:"user"|"ai", text, items, files}
+const AI_FIELDS={
+  fiber:[["EL","E L","GPa"],["ET","E T","GPa"],["G","G LT","GPa"],["G23","G TT","GPa"],["nu","ν LT",""],["rho","ρ","kg/m³"],["st","σ t","MPa"],["sc","σ c","MPa"],["a1","α L","10⁻⁶/K"],["a2","α T","10⁻⁶/K"]],
+  resin:[["E","E","GPa"],["nu","ν",""],["rho","ρ","kg/m³"],["st","σ t","MPa"],["sc","σ c","MPa"],["a","α","10⁻⁶/K"]],
+  ply:[["E1","E₁","GPa"],["E2","E₂","GPa"],["G12","G₁₂","GPa"],["G23","G₂₃","GPa"],["nu12","ν₁₂",""],["nu23","ν₂₃",""],["rho","ρ","kg/m³"],["a1","α₁","10⁻⁶/K"],
+       ["Xt","Xt","MPa"],["Xc","Xc","MPa"],["Yt","Yt","MPa"],["Yc","Yc","MPa"],["S12","S₁₂","MPa"]]
+};
+const AI_SYS=`You are the material assistant of Laminae, a composite laminate calculator.
+The user pastes product data sheets (text, images or PDF) of fibers, resins or prepregs, and asks questions.
+Answer briefly in the user's language. Each turn return JSON:
+- "reply": your answer (plain text, short).
+- "items": every material whose properties you can read in this turn (empty list if none).
+Item kinds:
+- "fiber": dry reinforcement fiber/filament. Fields EL (tensile modulus), ET, G, G23, nu, rho, st (tensile strength), sc, a1, a2.
+- "resin": neat cured matrix. Fields E, nu, rho, st, sc, a.
+- "ply": cured composite ply / prepreg lamina (0° = fiber direction). Fields E1, E2, G12, G23, nu12, nu23, rho, a1, Xt, Xc, Yt, Yc, S12, cpt (cured ply thickness mm), vf (fiber volume fraction 0-1).
+Units: moduli GPa, strengths MPa, density kg/m3, CTE 1e-6/K. Convert from ksi, Msi, g/cm3, psi, ppm/°F.
+Prefer room temperature dry values. Fill a field only if the sheet states it or it follows directly (e.g. unit conversion).
+Never invent values: leave unknown fields out and list them in "missing". Put any assumption in "note".`;
+
+function aiSchema(S_){
+  const n=()=>S_.number();
+  const vals={}; [...new Set(Object.values(AI_FIELDS).flat().map(f=>f[0]).concat(["cpt","vf"]))].forEach(k=>vals[k]=n());
+  return S_.object({properties:{
+    reply:S_.string(),
+    items:S_.array({items:S_.object({properties:{
+      kind:S_.enumString({enum:["fiber","resin","ply"]}),
+      name:S_.string(),
+      values:S_.object({properties:vals, optionalProperties:Object.keys(vals)}),
+      missing:S_.array({items:S_.string()}),
+      note:S_.string()
+    }, optionalProperties:["missing","note"]})})
+  }});
+}
+async function aiInit(){
+  if(AIX) return AIX;
+  if(!AI_CFG.recaptchaV3Key) throw new Error("not-configured");
+  const base="https://www.gstatic.com/firebasejs/"+AI_CFG.sdk+"/";
+  const [A,AI,AC]=await Promise.all([import(base+"firebase-app.js"),import(base+"firebase-ai.js"),import(base+"firebase-app-check.js")]);
+  const app=A.initializeApp(FIREBASE_CONFIG,"laminae-ai");
+  AC.initializeAppCheck(app,{provider:new AC.ReCaptchaV3Provider(AI_CFG.recaptchaV3Key),isTokenAutoRefreshEnabled:true});
+  const ai=AI.getAI(app,{backend:new AI.GoogleAIBackend(),useLimitedUseAppCheckTokens:true});
+  const model=AI.getGenerativeModel(ai,{model:AI_CFG.model,systemInstruction:AI_SYS,
+    generationConfig:{responseMimeType:"application/json",responseSchema:aiSchema(AI.Schema),temperature:0.2}});
+  AIX={model}; AICHAT=model.startChat({history:[]});
+  return AIX;
+}
+const fileToPart=f=>new Promise((res,rej)=>{const r=new FileReader();
+  r.onload=()=>res({inlineData:{data:String(r.result).split(",")[1],mimeType:f.type||"application/octet-stream"}}); r.onerror=rej; r.readAsDataURL(f);});
+
+function aiMd(t){ return esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>"); }
+function aiCard(it,li,ii){
+  const kind=AI_FIELDS[it.kind]?it.kind:"ply", F=AI_FIELDS[kind], v=it.values||{};
+  const label={fiber:"fiber",resin:"resin",ply:"ply / prepreg"}[kind];
+  return '<div class="aicard" data-l="'+li+'" data-it="'+ii+'"><div class="aich"><span class="aik">'+label+'</span>'+
+    '<input class="ainame" value="'+esc(it.name||"")+'" placeholder="name"></div><div class="aigrid">'+
+    F.map(([k,lab,u])=>'<label><span>'+lab+(u?' <i>'+u+'</i>':'')+'</span><input type="number" step="any" data-f="'+k+'" value="'+(v[k]!=null&&isFinite(v[k])?+(+v[k]).toPrecision(5):"")+'" placeholder="—"></label>').join("")+
+    (kind==="ply"?'<label><span>ply <i>mm</i></span><input type="number" step="any" data-f="cpt" value="'+(v.cpt!=null?v.cpt:"")+'" placeholder="—"></label>':'')+
+    '</div>'+(it.note||(it.missing&&it.missing.length)?'<p class="ainote">'+esc([it.note,(it.missing&&it.missing.length?"not on the sheet: "+it.missing.join(", "):"")].filter(Boolean).join(" · "))+'</p>':'')+
+    '<div class="btnrow"><button class="btn primary" data-aiadd>add to my '+(kind==="ply"?"plies":kind+"s")+'</button><span class="aiok"></span></div></div>';
+}
+function renderAI(){
+  const log=document.getElementById("aiLog"); if(!log) return;
+  const gate=!AI_CFG.recaptchaV3Key ? "The assistant is not enabled on this site yet."
+           : !AUTH ? "The assistant needs accounts, which are not enabled here."
+           : !USER ? "Sign in with Google — click the photo at the top left — to use the assistant." : "";
+  document.getElementById("aiGate").textContent=gate;
+  document.getElementById("aiGate").hidden=!gate;
+  document.getElementById("aiForm").classList.toggle("off",!!gate);
+  log.innerHTML=AI_LOG.length?AI_LOG.map((m,li)=>
+    '<div class="aim '+m.role+'">'+(m.files&&m.files.length?'<div class="aifiles">'+m.files.map(n=>'<span>'+esc(n)+'</span>').join("")+'</div>':'')+
+    (m.text?'<div class="aitx">'+aiMd(m.text)+'</div>':'')+
+    (m.items||[]).map((it,ii)=>aiCard(it,li,ii)).join("")+'</div>').join("")
+    :'<div class="aiempty">Paste a fiber, resin or prepreg data sheet — text, a screenshot or a PDF — or ask a question. The values read appear as cards you can check, correct and add to your library.</div>';
+  log.scrollTop=log.scrollHeight;
+  document.getElementById("aiAtt").innerHTML=aiPending.map((f,i)=>'<span>'+esc(f.name||"image")+'<button data-aidel="'+i+'">✕</button></span>').join("");
+  document.getElementById("aiSend").disabled=aiBusy;
+}
+async function aiSendMsg(){
+  if(aiBusy) return;
+  const ta=document.getElementById("aiIn"), text=ta.value.trim(), files=aiPending.slice();
+  if(!text&&!files.length) return;
+  if(!USER){ renderAI(); return; }
+  AI_LOG.push({role:"user",text,files:files.map(f=>f.name||"image")});
+  ta.value=""; aiPending=[]; aiBusy=true;
+  AI_LOG.push({role:"ai",text:"…"}); renderAI();
+  const out=AI_LOG[AI_LOG.length-1];
+  try{
+    await aiInit();
+    const parts=[]; if(text) parts.push({text}); else parts.push({text:"Read the properties in this data sheet."});
+    for(const f of files) parts.push(await fileToPart(f));
+    const res=await AICHAT.sendMessage(parts);
+    let j; try{ j=JSON.parse(res.response.text()); }catch(_){ j={reply:res.response.text(),items:[]}; }
+    out.text=j.reply||""; out.items=(j.items||[]).filter(it=>it&&it.values&&Object.keys(it.values).length);
+  }catch(e){
+    const m=String(e&&e.message||e);
+    out.text = m==="not-configured" ? "The assistant is not enabled on this site yet."
+      : /app.?check|403|attest/i.test(m) ? "Request refused by App Check. Reload the page and try again."
+      : /quota|429|RESOURCE_EXHAUSTED/i.test(m) ? "Free quota reached for now — try again in a minute."
+      : "Error: "+m;
+  }
+  aiBusy=false; renderAI();
+}
+function aiAddCard(card){
+  const li=+card.dataset.l, ii=+card.dataset.it, it=AI_LOG[li].items[ii], kind=AI_FIELDS[it.kind]?it.kind:"ply";
+  const v={}; card.querySelectorAll("input[data-f]").forEach(inp=>{ const x=parseFloat(inp.value); if(isFinite(x)) v[inp.dataset.f]=x; });
+  const name=card.querySelector(".ainame").value.trim()||("AI "+kind);
+  const ok=card.querySelector(".aiok"), id=uid8();
+  if(kind==="fiber"){
+    if(!(v.EL>0)){ ok.textContent="E L is needed"; return; }
+    const iso = (v.rho||0)>2000 && v.EL<110;                       // glass, basalt, quartz
+    const tpl = iso ? FIBERS.glass_e_rov : (v.rho||1800)<1600 ? FIBERS.aramid : v.EL>330 ? FIBERS.carbon_hm : v.EL>260 ? FIBERS.carbon_im : FIBERS.carbon_hr;
+    const d=k=>v[k]!=null?v[k]:tpl[k];
+    LIB.fibers[id]={name,form:"",col:iso?"#B2B9BE":tpl===FIBERS.aramid?"#C8A22B":"#16181C",
+      EL:v.EL, ET:iso?v.EL:d("ET"), G:v.G!=null?v.G:(iso?v.EL/2.44:tpl.G), G23:d("G23"), nu:d("nu"), rho:d("rho"),
+      st:d("st"), sc:v.sc!=null?v.sc:Math.round((iso?0.55:0.38)*(v.st||tpl.st)), a1:d("a1"), a2:iso&&v.a2==null?d("a1"):d("a2")};
+  } else if(kind==="resin"){
+    if(!(v.E>0)){ ok.textContent="E is needed"; return; }
+    LIB.resins[id]={name,E:v.E,nu:v.nu!=null?v.nu:0.37,rho:v.rho||1180,st:v.st||70,sc:v.sc||Math.round(1.5*(v.st||70)),a:v.a!=null?v.a:65};
+  } else {
+    if(!(v.E1>0&&v.E2>0)){ ok.textContent="E₁ and E₂ are needed"; return; }
+    const man=Object.assign({},MAN_DEFAULT);
+    AI_FIELDS.ply.forEach(([k])=>{ if(v[k]!=null) man[k]=v[k]; });
+    if(v.G23==null) man.G23=+(man.E2/2.9).toFixed(2);
+    LIB.plies[id]={name,man};
+  }
+  applyLibrary(); persist();
+  ok.textContent="added — now in the "+(kind==="resin"?"resin":"fiber")+" list";
+  card.querySelector("[data-aiadd]").disabled=true;
+}
+(function(){
+  const ta=document.getElementById("aiIn");
+  document.getElementById("aiSend").onclick=aiSendMsg;
+  ta.addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); aiSendMsg(); } });
+  const take=list=>{ for(const f of list){ if(/^image\/|application\/pdf/.test(f.type)&&f.size<15e6) aiPending.push(f); } renderAI(); };
+  ta.addEventListener("paste",e=>{ const fs=[...(e.clipboardData&&e.clipboardData.files||[])]; if(fs.length){ e.preventDefault(); take(fs); } });
+  const pane=document.getElementById("p-ai");
+  pane.addEventListener("dragover",e=>{ e.preventDefault(); pane.classList.add("drop"); });
+  pane.addEventListener("dragleave",()=>pane.classList.remove("drop"));
+  pane.addEventListener("drop",e=>{ e.preventDefault(); pane.classList.remove("drop"); take([...e.dataTransfer.files]); });
+  document.getElementById("aiFile").onchange=e=>{ take([...e.target.files]); e.target.value=""; };
+  document.getElementById("aiAtt").addEventListener("click",e=>{ const b=e.target.closest("[data-aidel]"); if(b){ aiPending.splice(+b.dataset.aidel,1); renderAI(); } });
+  document.getElementById("aiLog").addEventListener("click",e=>{ const b=e.target.closest("[data-aiadd]"); if(b) aiAddCard(b.closest(".aicard")); });
+  document.getElementById("aiNew").onclick=()=>{ AI_LOG.length=0; aiPending=[]; if(AIX) AICHAT=AIX.model.startChat({history:[]}); renderAI(); };
+  renderAI();
+})();
 </script>
 </body>
 </html>
