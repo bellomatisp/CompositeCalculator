@@ -2539,7 +2539,8 @@ function fiberOptions(p){
   const cat=Object.keys(FIBERS).filter(k=>k.indexOf("u_")!==0);
   const mine=Object.keys(FIBERS).filter(k=>k.indexOf("u_")===0);
   const plies=Object.entries(LIB.plies);
-  const fams=[...new Set(cat.map(k=>FIBERS[k].fam||"generic"))];
+  const ORD=["generic","carbon · standard modulus","carbon · intermediate modulus","carbon · high modulus","carbon · ultra high modulus (pitch)","glass & quartz","aramid & polymer fibers","natural fibers"];
+  const fams=[...new Set(cat.map(k=>FIBERS[k].fam||"generic"))].sort((a,b)=>(ORD.indexOf(a)+99*(ORD.indexOf(a)<0))-(ORD.indexOf(b)+99*(ORD.indexOf(b)<0)));
   const ftip=f=>f.EL+" GPa · "+f.st+" MPa · "+f.rho+" kg/m³"+(f.src?" — "+f.src:"");
   let h=fams.map(fm=>'<optgroup label="'+esc(fm)+'">'+cat.filter(k=>(FIBERS[k].fam||"generic")===fm)
     .map(k=>opt(k,FIBERS[k].name,p.fib===k,ftip(FIBERS[k]))).join("")+'</optgroup>').join("");
@@ -2556,7 +2557,8 @@ function fillResinSelect(){
     (r.src?' title="'+esc(r.E+" GPa · "+r.st+" MPa · "+r.rho+" kg/m³ — "+r.src)+'"':"")+'>'+esc(r.name)+'</option>';};
   const cat=Object.keys(RESINS).filter(k=>k.indexOf("u_")!==0&&k!=="custom");
   const mine=Object.keys(RESINS).filter(k=>k.indexOf("u_")===0);
-  const fams=[...new Set(cat.map(k=>RESINS[k].fam||"generic"))];
+  const ORD=["generic","epoxy · infusion & RTM","epoxy · wet lay-up","epoxy · prepreg matrix","polyester & vinyl ester","high temperature","thermoplastics"];
+  const fams=[...new Set(cat.map(k=>RESINS[k].fam||"generic"))].sort((a,b)=>ORD.indexOf(a)-ORD.indexOf(b));
   document.getElementById("res").innerHTML=
     fams.map(fm=>'<optgroup label="'+esc(fm)+'">'+cat.filter(k=>(RESINS[k].fam||"generic")===fm).map(opt).join("")+'</optgroup>').join("")+
     (mine.length?'<optgroup label="my resins">'+mine.map(opt).join("")+'</optgroup>':'')+opt("custom");
