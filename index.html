@@ -2833,13 +2833,13 @@ initFirebase();
    Paste or drop a datasheet (text, image, PDF), chat about it; the
    model returns the properties it read as structured data, shown as
    editable cards that go straight into the library.
-   Protected by Firebase App Check (reCAPTCHA v3) and limited to
+   Protected by Firebase App Check (reCAPTCHA Enterprise) and limited to
    signed-in users.
    =================================================================== */
 const AI_CFG={
   sdk:"13.2.0",
   model:"gemini-3.8-flash",
-  recaptchaV3Key:""            // App Check site key; empty = assistant disabled
+  recaptchaKey:"6Lc17zQuAAAAAOQSMmiOLZ_PTrak8mhYc2vgS8yf"   // App Check, reCAPTCHA Enterprise (Fraud Defense) site key — public
 };
 let AIX=null, AICHAT=null, aiBusy=false, aiPending=[];
 const AI_LOG=[];               // {role:"user"|"ai", text, items, files}
@@ -2878,11 +2878,11 @@ function aiSchema(S_){
 }
 async function aiInit(){
   if(AIX) return AIX;
-  if(!AI_CFG.recaptchaV3Key) throw new Error("not-configured");
+  if(!AI_CFG.recaptchaKey) throw new Error("not-configured");
   const base="https://www.gstatic.com/firebasejs/"+AI_CFG.sdk+"/";
   const [A,AI,AC]=await Promise.all([import(base+"firebase-app.js"),import(base+"firebase-ai.js"),import(base+"firebase-app-check.js")]);
   const app=A.initializeApp(FIREBASE_CONFIG,"laminae-ai");
-  AC.initializeAppCheck(app,{provider:new AC.ReCaptchaV3Provider(AI_CFG.recaptchaV3Key),isTokenAutoRefreshEnabled:true});
+  AC.initializeAppCheck(app,{provider:new AC.ReCaptchaEnterpriseProvider(AI_CFG.recaptchaKey),isTokenAutoRefreshEnabled:true});
   const ai=AI.getAI(app,{backend:new AI.GoogleAIBackend(),useLimitedUseAppCheckTokens:true});
   const model=AI.getGenerativeModel(ai,{model:AI_CFG.model,systemInstruction:AI_SYS,
     generationConfig:{responseMimeType:"application/json",responseSchema:aiSchema(AI.Schema),temperature:0.2}});
@@ -2905,7 +2905,7 @@ function aiCard(it,li,ii){
 }
 function renderAI(){
   const log=document.getElementById("aiLog"); if(!log) return;
-  const gate=!AI_CFG.recaptchaV3Key ? "The assistant is not enabled on this site yet."
+  const gate=!AI_CFG.recaptchaKey ? "The assistant is not enabled on this site yet."
            : !AUTH ? "The assistant needs accounts, which are not enabled here."
            : !USER ? "Sign in with Google — click the photo at the top left — to use the assistant." : "";
   document.getElementById("aiGate").textContent=gate;
