@@ -2882,11 +2882,11 @@ async function aiInit(){
   const base="https://www.gstatic.com/firebasejs/"+AI_CFG.sdk+"/";
   const [A,AI,AC]=await Promise.all([import(base+"firebase-app.js"),import(base+"firebase-ai.js"),import(base+"firebase-app-check.js")]);
   const app=A.initializeApp(FIREBASE_CONFIG,"laminae-ai");
-  AC.initializeAppCheck(app,{provider:new AC.ReCaptchaEnterpriseProvider(AI_CFG.recaptchaKey),isTokenAutoRefreshEnabled:true});
+  const appCheck=AC.initializeAppCheck(app,{provider:new AC.ReCaptchaEnterpriseProvider(AI_CFG.recaptchaKey),isTokenAutoRefreshEnabled:true});
   const ai=AI.getAI(app,{backend:new AI.GoogleAIBackend(),useLimitedUseAppCheckTokens:true});
   const model=AI.getGenerativeModel(ai,{model:AI_CFG.model,systemInstruction:AI_SYS,
     generationConfig:{responseMimeType:"application/json",responseSchema:aiSchema(AI.Schema),temperature:0.2}});
-  AIX={model}; AICHAT=model.startChat({history:[]});
+  AIX={model,appCheck,AC}; AICHAT=model.startChat({history:[]});
   return AIX;
 }
 const fileToPart=f=>new Promise((res,rej)=>{const r=new FileReader();
@@ -2930,15 +2930,26 @@ async function aiSendMsg(){
   AI_LOG.push({role:"ai",text:"…"}); renderAI();
   const out=AI_LOG[AI_LOG.length-1];
   try{
-    await aiInit();
+    const step=s=>{ out.text=s; renderAI(); };
+    const within=(p,ms,code)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error(code)),ms))]);
+    step("loading…");
+    await within(aiInit(),20000,"sdk-timeout");
+    step("checking App Check…");
+    const tk=await within(AIX.AC.getLimitedUseToken(AIX.appCheck),25000,"appcheck-timeout");
+    if(!tk||!tk.token) throw new Error("appcheck-empty");
+    step("asking Gemini…");
     const parts=[]; if(text) parts.push({text}); else parts.push({text:"Read the properties in this data sheet."});
     for(const f of files) parts.push(await fileToPart(f));
-    const res=await AICHAT.sendMessage(parts);
+    const res=await AICHAT.sendMessage(parts,{timeout:90000});
     let j; try{ j=JSON.parse(res.response.text()); }catch(_){ j={reply:res.response.text(),items:[]}; }
     out.text=j.reply||""; out.items=(j.items||[]).filter(it=>it&&it.values&&Object.keys(it.values).length);
   }catch(e){
     const m=String(e&&e.message||e);
+    console.warn("[assistant]",e);
     out.text = m==="not-configured" ? "The assistant is not enabled on this site yet."
+      : m==="sdk-timeout" ? "Could not load the Firebase AI SDK (network or blocker)."
+      : /appcheck-timeout|appcheck-empty/.test(m) ? "App Check did not deliver a token (reCAPTCHA). Disable ad/tracker blockers for this site and reload; if it persists the reCAPTCHA key is not active yet."
+      : /Timeout has expired|AbortError/i.test(m) ? "Gemini did not answer in time. Try again, or with a shorter text / smaller image."
       : /app.?check|403|attest/i.test(m) ? "Request refused by App Check. Reload the page and try again."
       : /quota|429|RESOURCE_EXHAUSTED/i.test(m) ? "Free quota reached for now — try again in a minute."
       : "Error: "+m;
