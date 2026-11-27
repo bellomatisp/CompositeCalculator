@@ -2450,13 +2450,9 @@ const AUTH_ERR={
 function amsg(t,cls){ const m=document.getElementById("amsg"); if(m){ m.textContent=t||""; m.className="amsg"+(cls?" "+cls:""); } }
 async function authDo(kind){
   if(!AUTH) return;
-  const em=(document.getElementById("aEmail")||{}).value||"", pw=(document.getElementById("aPass")||{}).value||"";
   try{
     amsg("…");
     if(kind==="google") await AUTH.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-    else if(kind==="in") await AUTH.signInWithEmailAndPassword(em.trim(),pw);
-    else if(kind==="up") await AUTH.createUserWithEmailAndPassword(em.trim(),pw);
-    else if(kind==="reset"){ await AUTH.sendPasswordResetEmail(em.trim()); amsg("Reset link sent to "+em.trim()+".","ok"); return; }
     else if(kind==="out"){ await AUTH.signOut(); return; }
     amsg("");
   }catch(e){ amsg(AUTH_ERR[e.code]||e.message,"err"); }
@@ -2478,17 +2474,8 @@ function renderAcct(err){
   } else {
     h.innerHTML='<div class="acct"><div class="mini" style="margin:0 0 10px;color:var(--ink-2)">Sign in to keep your fibers, resins and plies on every device.</div>'+
       '<button class="gbtn" id="aGoogle">'+GLOGO+'Continue with Google</button>'+
-      '<div class="or">or with email</div>'+
-      '<input type="email" id="aEmail" placeholder="email" autocomplete="email">'+
-      '<input type="password" id="aPass" placeholder="password" autocomplete="current-password">'+
-      '<div class="btnrow"><button class="btn primary" id="aIn">sign in</button><button class="btn" id="aUp">create account</button>'+
-      '<button class="linkbtn" id="aReset" style="margin-left:auto">forgot password?</button></div>'+
       '<p class="amsg" id="amsg"></p><div class="sync" id="syncNote"></div></div>';
     document.getElementById("aGoogle").onclick=()=>authDo("google");
-    document.getElementById("aIn").onclick=()=>authDo("in");
-    document.getElementById("aUp").onclick=()=>authDo("up");
-    document.getElementById("aReset").onclick=()=>authDo("reset");
-    document.getElementById("aPass").addEventListener("keydown",e=>{ if(e.key==="Enter") authDo("in"); });
   }
   renderAcctNote();
 }

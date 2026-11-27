@@ -6,7 +6,7 @@
   },
   "auth": {
     "providers": {
-      "emailPassword": true,
+      "emailPassword": false,
       "googleSignIn": {
         "oAuthBrandDisplayName": "Laminae",
         "supportEmail": "bellomatisp@gmail.com",
