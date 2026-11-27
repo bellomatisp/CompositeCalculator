@@ -2862,7 +2862,7 @@ To propose solutions, compare 2-3 candidate materials with their key numbers and
 Answer briefly in the user's language.
 
 ALWAYS end your answer with ONE fenced block \`\`\`json ... \`\`\` holding:
-{"reply": "short answer for the user (plain text)",
+{"reply": "answer for the user, plain text; for proposals or comparisons one line per candidate: name — key numbers (E, strength, density…) — why it fits",
  "items": [ materials whose numbers you give, with values ],
  "actions": [ changes to apply to the calculator, only when the user asks to build/modify the laminate or accepts a proposal ]}
 
@@ -2994,7 +2994,8 @@ async function aiSendMsg(){
     AICHAT.hist.push(userTurn,{role:"model",parts:[{text:raw}]});
     out.model=AI_CFG.models[AICHAT.i];
     const j=aiParse(raw);
-    out.text=j.reply||""; out.items=(j.items||[]).filter(it=>it&&it.values&&Object.keys(it.values).length);
+    const prose=raw.replace(/```[\s\S]*?```/g,"").trim();
+    out.text=(prose.length>(j.reply||"").length+40?prose:j.reply)||""; out.items=(j.items||[]).filter(it=>it&&it.values&&Object.keys(it.values).length);
     out.actions=(j.actions||[]).filter(x=>x&&x.op);
     const gm=res.response.candidates&&res.response.candidates[0]&&res.response.candidates[0].groundingMetadata;
     if(gm){
